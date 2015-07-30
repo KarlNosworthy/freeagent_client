@@ -1,7 +1,8 @@
 # FreeAgent Client
 
-
 A Java based client for FreeAgent that allows simple access to the API utilising the awesome [Retrofit](http://square.github.io/retrofit/).
+
+[![Build Status](https://travis-ci.org/KarlNosworthy/retrofit_freeagent_client.svg)](https://travis-ci.org/KarlNosworthy/retrofit_freeagent_client)
 
 Authentication is required before the client can be used and is performing using OAuth 2.0.
 
@@ -13,8 +14,7 @@ FreeAgentClient freeAgentClient = FreeAgentClient.authorise("OAuth Key here",
 ```
 
 Once you have an authenticated instance you can use it to access the various entities and rich information that FreeAgent 
-provides for the specified account. At the current moment only a simple implementation of reading Contacts has been
-provided but full CRUD for Contacts will be supported shortly and then followed by Projects.
+provides for the specified account.
 
 
 ## Contacts
