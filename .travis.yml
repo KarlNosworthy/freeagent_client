@@ -1,7 +1,6 @@
 language: java
 jdk: oraclejdk7
 
-before_install:
- - chmod +x gradlew
+before_install: chmod +x ./gradlew
 
 script: ./gradlew check
