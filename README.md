@@ -21,28 +21,49 @@ provided but full CRUD for Contacts will be supported shortly and then followed 
 
 To list all the contacts attached to an account;
 ```java
-List<Contact> contacts = freeAgentClient.getContacts();
+List<FreeAgentContact> contacts = freeAgentClient.getContacts();
 ```
 To obtain a specific contact (by known identifier);
 ```java
-Integer contactId = ... ; // set your valid identifier here
-Contact contact = freeAgentClient.getContact(contactId);
+String contactId = "Set your valid identifier here"
+FreeAgentContact contact = freeAgentClient.getContact(contactId);
 ```
 
 #### Filtering / Sorting
 To show only contacts who are attached to active projects
 ```java
-List<Contact> contactsWithActiveProjects = freeAgentClient.getContacts(ContactViewType.ActiveProjects);
+List<FreeAgentContact> contacts = freeAgentClient.getContacts(ContactViewType.ActiveProjects);
 ```
 To show only contacts that have been hidden and sort by their creation dates in ascending order;
 ```java
-List<Contact> contactsWithActiveProjects = freeAgentClient.getContacts(ContactViewType.Hidden,
+List<FreeAgentContact> contacts = freeAgentClient.getContacts(ContactViewType.Hidden,
                                                                        ContactSortOrderType.CreatedAtAscending);
 ````
 or to sort by descending order
 ```java
-List<Contact> contactsWithActiveProjects = freeAgentClient.getContacts(ContactViewType.Hidden,
+List<FreeAgentContact> contacts = freeAgentClient.getContacts(ContactViewType.Hidden,
                                                                        ContactSortOrderType.CreatedAtDescending);
 ````
+#### Creating a new contact
+```java
+FreeAgentContact contact = new FreeAgentContact();
+contact.setFirstName("Bob");
+contact.setLastName("Tester");
+contact.setEmail("bob.tester@bobstesting.com");
 
+// a new contact instance is returned with the identifier url and created_at timestamp set or null
+// returned if creation failed.
+FreeAgentContact contact = freeAgentClient.createContact(contact);
+```
+#### Updating a contact
+```java
+contact.setEmail("bob@bobstesting.com");
+contact.setBillingEmail("billing@bobstesting.com");
+
+boolean updateSuccessful = freeAgentClient.updateContact(contact);
+```
+#### Deleting a contact
+```java
+boolean deleteSuccessful = freeAgentClient.deleteContact(contact);
+```
 
