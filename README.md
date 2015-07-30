@@ -19,13 +19,13 @@ provides for the specified account.
 
 ## Contacts
 
-To list all the contacts attached to an account;
+To list all the contacts attached to an account
 ```java
 List<FreeAgentContact> contacts = freeAgentClient.getContacts();
 ```
-To obtain a specific contact (by known identifier);
+To obtain a specific contact (by known identifier)
 ```java
-String contactId = "Set your valid identifier here"
+String contactId = "Set your valid contact identifier here";
 FreeAgentContact contact = freeAgentClient.getContact(contactId);
 ```
 
@@ -34,7 +34,7 @@ To show only contacts who are attached to active projects
 ```java
 List<FreeAgentContact> contacts = freeAgentClient.getContacts(ContactViewType.ActiveProjects);
 ```
-To show only contacts that have been hidden and sort by their creation dates in ascending order;
+To show only contacts that have been hidden and sort by their creation dates in ascending order
 ```java
 List<FreeAgentContact> contacts = freeAgentClient.getContacts(ContactViewType.Hidden,
                                                                        ContactSortOrderType.CreatedAtAscending);
@@ -66,4 +66,32 @@ boolean updateSuccessful = freeAgentClient.updateContact(contact);
 ```java
 boolean deleteSuccessful = freeAgentClient.deleteContact(contact);
 ```
+
+### Projects
+To list all the projects attached to an account
+```java
+List<FreeAgentProject> project = freeAgentClient.getProjects();
+```
+To obtain a specific project (by known identifier)
+```java
+String projectId = "Set your valid project identifier here";
+
+FreeAgentProject project = freeAgentClient.getProject(projectId);
+```
+To obtain the contact for a specific project
+```java
+String projectId = "Set your valid project identifier here";
+
+FreeAgentProject project = freeAgentClient.getProject(projectId);
+FreeAgentContact projectContact = freeAgentClient.getContact(project);
+```
+To obtain the projects for a specific contact
+```java
+String contactId = "Set your valid contact identifier here";
+
+FreeAgentContact contact = freeAgentClient.getContact(contactId);
+List<FreeAgentProject> projects = freeAgentClient.getProjects(contact);
+```
+
+
 
