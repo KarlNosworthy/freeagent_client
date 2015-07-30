@@ -1,4 +1,5 @@
 apply plugin: 'java'
+apply plugin: 'pmd'
 
 group = project_group
 version = project_version

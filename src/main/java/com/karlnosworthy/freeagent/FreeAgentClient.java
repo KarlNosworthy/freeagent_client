@@ -32,6 +32,8 @@ public class FreeAgentClient {
     public static final String SANDBOX_URL = "https://api.sandbox.freeagent.com";
     public static final String LIVE_URL = "https://api.freeagent.com/v2";
 
+    private static final String LOCALHOST = "127.0.0.1"; // NOPMD
+
     private static final File DATA_STORE_DIR = new File(System.getProperty("user.home"), ".store/oauth2_sample");
 
     private static final HttpTransport HTTP_TRANSPORT = new NetHttpTransport();
@@ -68,7 +70,7 @@ public class FreeAgentClient {
                 .setDataStoreFactory(DATA_STORE_FACTORY).build();
 
         // authorize
-        LocalServerReceiver receiver = new LocalServerReceiver.Builder().setHost("127.0.0.1")
+        LocalServerReceiver receiver = new LocalServerReceiver.Builder().setHost(LOCALHOST)
                                                                         .setPort(8080)
                                                                         .build();
 
