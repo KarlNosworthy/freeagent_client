@@ -1,7 +1,8 @@
-package com.karlnosworthy.freeagent.model;
+package com.karlnosworthy.freeagent.model.wrapper;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
+import com.karlnosworthy.freeagent.model.FreeAgentProject;
 
 import java.util.List;
 

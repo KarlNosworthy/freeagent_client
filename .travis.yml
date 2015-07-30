@@ -1,5 +1,8 @@
 language: java
-jdk: oraclejdk7
+jdk:
+  - oraclejdk8
+  - oraclejdk7
+  - openjdk6
 
 before_install: chmod +x ./gradlew
 install: ./gradlew assemble --stacktrace

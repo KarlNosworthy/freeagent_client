@@ -1,6 +1,9 @@
 package com.karlnosworthy.freeagent;
 
-import com.karlnosworthy.freeagent.model.*;
+import com.karlnosworthy.freeagent.model.wrapper.FreeAgentContactWrapper;
+import com.karlnosworthy.freeagent.model.wrapper.FreeAgentContactsWrapper;
+import com.karlnosworthy.freeagent.model.wrapper.FreeAgentProjectWrapper;
+import com.karlnosworthy.freeagent.model.wrapper.FreeAgentProjectsWrapper;
 import retrofit.client.Response;
 import retrofit.http.*;
 
@@ -35,6 +38,9 @@ public interface FreeAgentService {
     //
     @GET("/projects/")
     FreeAgentProjectsWrapper getProjects();
+
+    @GET("/projects")
+    FreeAgentProjectsWrapper getProjects(@Query("contact") String contactURL);
 
     @GET("/projects/{id}")
     FreeAgentProjectWrapper getProject(@Path("id") String projectId);

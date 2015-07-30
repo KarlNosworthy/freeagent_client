@@ -12,6 +12,10 @@ import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.client.util.store.FileDataStoreFactory;
 import com.karlnosworthy.freeagent.model.*;
+import com.karlnosworthy.freeagent.model.wrapper.FreeAgentContactWrapper;
+import com.karlnosworthy.freeagent.model.wrapper.FreeAgentContactsWrapper;
+import com.karlnosworthy.freeagent.model.wrapper.FreeAgentProjectWrapper;
+import com.karlnosworthy.freeagent.model.wrapper.FreeAgentProjectsWrapper;
 import retrofit.RequestInterceptor;
 import retrofit.RestAdapter;
 import retrofit.client.Response;
@@ -239,6 +243,23 @@ public class FreeAgentClient {
 
         if (projectsWrapper != null) {
             return projectsWrapper.getProjectList();
+        }
+        return null;
+    }
+
+    /**
+     * Returns a list of projects that are associated with the specified contact.
+     *
+     * @param contact The contact instance to look up projects for.
+     * @return A list of the appropriate projects or null.
+     */
+    public List<FreeAgentProject> getProjects(FreeAgentContact contact) {
+        if (contact != null && contact.getUrl() != null && !contact.getUrl().isEmpty()) {
+
+            FreeAgentProjectsWrapper projectsWrapper = freeAgentServiceInstance.getProjects(contact.getUrl());
+            if (projectsWrapper != null) {
+                return projectsWrapper.getProjectList();
+            }
         }
         return null;
     }
