@@ -16,6 +16,7 @@ import com.karlnosworthy.freeagent.model.FreeAgentContactWrapper;
 import com.karlnosworthy.freeagent.model.FreeAgentContactsWrapper;
 import retrofit.RequestInterceptor;
 import retrofit.RestAdapter;
+import retrofit.client.Response;
 
 import java.io.File;
 import java.io.IOException;
@@ -23,7 +24,7 @@ import java.util.List;
 
 
 /**
- * A simple, retrofit based client to allow CRUD access to a FreeAgent account. Utilises OAuth2 to provide
+ * A simple, retrofit based client to allow CRUD access to a FreeAgentService account. Utilises OAuth2 to provide
  * suitable authentication before an instance can be supplied for use.
  *
  * @author Karl Nosworthy
@@ -38,15 +39,15 @@ public class FreeAgentClient {
     private static final HttpTransport HTTP_TRANSPORT = new NetHttpTransport();
     private static final JsonFactory JSON_FACTORY = new JacksonFactory();
     private static FileDataStoreFactory DATA_STORE_FACTORY;
+    private static FreeAgentService freeAgentServiceInstance;
     private Credential credential;
-    private static FreeAgent freeAgentInstance;
 
 
 
     /**
      * Authorises, initialises and returns a new FreeAgentClient instance.
      *
-     * @param identifier The identifier to use for OAuth authentication and FreeAgent recognition.
+     * @param identifier The identifier to use for OAuth authentication and FreeAgentService recognition.
      * @param secret The secret to use for OAuth authentication.
      * @param apiURL The URL of the API to target {@link #LIVE_URL}, {@link #SANDBOX_URL} etc.
      * @return An authenticated instance which is ready to use or null
@@ -83,13 +84,13 @@ public class FreeAgentClient {
     }
 
     /**
-     * Returns a list of all the known contacts contained within FreeAgent
+     * Returns a list of all the known contacts contained within FreeAgentService
      * for the authorised account.
      *
      * @return A list of Contact instances.
      */
     public List<FreeAgentContact> getContacts() {
-        FreeAgentContactsWrapper contactsWrapper = freeAgentInstance.listContacts();
+        FreeAgentContactsWrapper contactsWrapper = freeAgentServiceInstance.listContacts();
         if (contactsWrapper != null) {
             return contactsWrapper.getContactList();
         }
@@ -97,14 +98,14 @@ public class FreeAgentClient {
     }
 
     /**
-     * Returns a list of all the known contacts contained within FreeAgent
+     * Returns a list of all the known contacts contained within FreeAgentService
      * for the authorised account.
      *
      * @param viewType The view type {@link com.karlnosworthy.freeagent.FreeAgentClient.ContactViewType} filter to apply to the contacts
      * @return A list of Contact instances.
      */
     public List<FreeAgentContact> getContacts(ContactViewType viewType) {
-        FreeAgentContactsWrapper contactsWrapper = freeAgentInstance.getContacts(viewType.identifier);
+        FreeAgentContactsWrapper contactsWrapper = freeAgentServiceInstance.getContacts(viewType.identifier);
         if (contactsWrapper != null) {
             return contactsWrapper.getContactList();
         }
@@ -112,7 +113,7 @@ public class FreeAgentClient {
     }
 
     /**
-     * Returns a list of all the known contacts contained within FreeAgent
+     * Returns a list of all the known contacts contained within FreeAgentService
      * for the authorised account.
      *
      * @param viewType The view type {@link com.karlnosworthy.freeagent.FreeAgentClient.ContactViewType} filter to apply to the contacts.
@@ -120,7 +121,7 @@ public class FreeAgentClient {
      * @return A list of Contact instances.
      */
     public List<FreeAgentContact> getContacts(ContactViewType viewType, ContactSortOrderType sortOrderType) {
-        FreeAgentContactsWrapper contactsWrapper = freeAgentInstance.getContacts(viewType.identifier, sortOrderType.identifier);
+        FreeAgentContactsWrapper contactsWrapper = freeAgentServiceInstance.getContacts(viewType.identifier, sortOrderType.identifier);
         if (contactsWrapper != null) {
             return contactsWrapper.getContactList();
         }
@@ -133,14 +134,77 @@ public class FreeAgentClient {
      * @param contactId The id to match.
      * @return A Contact instance or null if the id supplied was invalid or could not be matched.
      */
-    public FreeAgentContact getContact(Integer contactId) {
-        if (contactId != null && contactId > 0) {
-            FreeAgentContactWrapper contactWrapper = freeAgentInstance.getContact(contactId);
+    public FreeAgentContact getContact(String contactId) {
+        if (contactId != null && !contactId.isEmpty()) {
+            FreeAgentContactWrapper contactWrapper = freeAgentServiceInstance.getContact(contactId);
             if (contactWrapper != null) {
                 return contactWrapper.getContact();
             }
         }
         return null;
+    }
+
+    /**
+     * Attempts to create a new contact entry in the associated FreeAgent account.
+     *
+     * Will return null if the contact instance provided is null or cannot be saved into the account.
+     *
+     * @param contact The populated contact instance.
+     * @return The updated contact instance or null.
+     */
+    public FreeAgentContact createContact(FreeAgentContact contact) {
+        if (contact != null) {
+            FreeAgentContactWrapper contactWrapper = freeAgentServiceInstance.createContact(new FreeAgentContactWrapper(contact));
+            if (contactWrapper != null) {
+                return contactWrapper.getContact();
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Attempts to update the specified contact entry in the associated FreeAgent account.
+     *
+     * @param contact The populated contact instance.
+     * @return True if the contact has been updated successfully, otherwise false.
+     */
+    public boolean updateContact(FreeAgentContact contact) {
+        if (contact != null) {
+            String contactId = extractIdentifier(contact);
+
+            if (contactId != null && !contactId.isEmpty()) {
+                Response response = freeAgentServiceInstance.updateContact(new FreeAgentContactWrapper(contact), contactId);
+                if (response.getStatus() == 200) {
+                    return true;
+                } else {
+                    return false;
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Attempts to delete the specified contact entry in the associated FreeAgent account.
+     *
+     * @param contact The populated contact instance.
+     * @return True if the contact has been deleted successfully, otherwise false.
+     */
+    public boolean deleteContact(FreeAgentContact contact) {
+        if (contact != null) {
+            String contactId = extractIdentifier(contact);
+
+            if (contactId != null && !contactId.isEmpty()) {
+                Response response = freeAgentServiceInstance.deleteContact(contactId);
+
+                if (response.getStatus() == 200) {
+                    return true;
+                } else {
+                    return false;
+                }
+            }
+        }
+        return false;
     }
 
 
@@ -151,6 +215,7 @@ public class FreeAgentClient {
         RestAdapter.Builder builder = new RestAdapter.Builder()
                 .setEndpoint(apiURL);
 
+        builder.setLogLevel(RestAdapter.LogLevel.FULL);
         builder.setRequestInterceptor(new RequestInterceptor() {
 
             @Override
@@ -161,9 +226,15 @@ public class FreeAgentClient {
 
         RestAdapter restAdapter = builder.build();
 
-        freeAgentInstance = restAdapter.create(FreeAgent.class);
+        freeAgentServiceInstance = restAdapter.create(FreeAgentService.class);
     }
 
+    public String extractIdentifier(FreeAgentContact contact) {
+        if (contact != null && contact.getUrl() != null && !contact.getUrl().isEmpty()) {
+            return contact.getUrl().substring(1 + contact.getUrl().lastIndexOf("/"));
+        }
+        return "";
+    }
 
     public enum ContactViewType {
         All("all"),

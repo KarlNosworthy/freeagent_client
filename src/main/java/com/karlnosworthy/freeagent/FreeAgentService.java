@@ -3,9 +3,10 @@ package com.karlnosworthy.freeagent;
 import com.karlnosworthy.freeagent.model.FreeAgentContact;
 import com.karlnosworthy.freeagent.model.FreeAgentContactWrapper;
 import com.karlnosworthy.freeagent.model.FreeAgentContactsWrapper;
+import retrofit.client.Response;
 import retrofit.http.*;
 
-public interface FreeAgent {
+public interface FreeAgentService {
 
     //
     // ==== Contacts ===
@@ -20,16 +21,16 @@ public interface FreeAgent {
     FreeAgentContactsWrapper getContacts(@Query("view") String viewFilter, @Query("sort") String sortOrder);
 
     @GET("/contacts/{id}")
-    FreeAgentContactWrapper getContact(@Path("id") Integer contactId);
+    FreeAgentContactWrapper getContact(@Path("id") String contactId);
 
     @POST("/contacts")
-    FreeAgentContactWrapper createContact(@Body FreeAgentContact contact);
+    FreeAgentContactWrapper createContact(@Body FreeAgentContactWrapper contact);
 
-    @PUT("/contacts/:{id}")
-    void updateContact(@Body FreeAgentContact contact, @Path("id") Integer contactId);
+    @PUT("/contacts/{id}")
+    Response updateContact(@Body FreeAgentContactWrapper contact, @Path("id") String contactId);
 
-    @DELETE("/contacts/:id")
-    void deleteContact(@Path("id") Integer contactId);
+    @DELETE("/contacts/{id}")
+    Response deleteContact(@Path("id") String contactId);
 }
 
 

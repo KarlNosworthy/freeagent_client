@@ -8,6 +8,15 @@ public class FreeAgentContactWrapper {
     private FreeAgentContact contact;
 
 
+    public FreeAgentContactWrapper() {
+        super();
+    }
+
+    public FreeAgentContactWrapper(FreeAgentContact contact) {
+        super();
+        this.contact = contact;
+    }
+
     public FreeAgentContact getContact() {
         return contact;
     }
