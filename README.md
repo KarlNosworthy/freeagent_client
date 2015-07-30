@@ -1,6 +1,6 @@
 # FreeAgent Client
 
-A Java based client for FreeAgent that allows simple access to the API utilising the awesome [Retrofit](http://square.github.io/retrofit/).
+A Java based client for [FreeAgent](http://freeagent.com) that allows simple access to the API utilising the awesome [Retrofit](http://square.github.io/retrofit/).
 
 [![Build Status](https://travis-ci.org/KarlNosworthy/retrofit_freeagent_client.svg)](https://travis-ci.org/KarlNosworthy/retrofit_freeagent_client)
 
@@ -23,7 +23,7 @@ To obtain information about the company associated with the account
 ```java
 FreeAgentCompany company = freeAgentClient.getCompany();
 ```
-  **NOTE:** The FreeAgent API only allows read access to the Company information and therefor so does this client.
+  **NOTE:** The FreeAgent API only allows read access to the Company information and therefore so does this client.
 
 ## Contacts
 
@@ -34,6 +34,7 @@ List<FreeAgentContact> contacts = freeAgentClient.getContacts();
 To obtain a specific contact (by known identifier)
 ```java
 String contactId = "Set your valid contact identifier here";
+
 FreeAgentContact contact = freeAgentClient.getContact(contactId);
 ```
 
