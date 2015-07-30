@@ -17,6 +17,14 @@ Once you have an authenticated instance you can use it to access the various ent
 provides for the specified account.
 
 
+## Company
+
+To obtain information about the company associated with the account
+```java
+FreeAgentCompany company = freeAgentClient.getCompany();
+```
+  **NOTE:** The FreeAgent API only allows read access to the Company information and therefor so does this client.
+
 ## Contacts
 
 To list all the contacts attached to an account
@@ -67,7 +75,7 @@ boolean updateSuccessful = freeAgentClient.updateContact(contact);
 boolean deleteSuccessful = freeAgentClient.deleteContact(contact);
 ```
 
-### Projects
+## Projects
 To list all the projects attached to an account
 ```java
 List<FreeAgentProject> project = freeAgentClient.getProjects();
