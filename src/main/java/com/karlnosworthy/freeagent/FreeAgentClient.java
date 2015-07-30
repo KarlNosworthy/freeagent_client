@@ -11,9 +11,7 @@ import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.client.util.store.FileDataStoreFactory;
-import com.karlnosworthy.freeagent.model.FreeAgentContact;
-import com.karlnosworthy.freeagent.model.FreeAgentContactWrapper;
-import com.karlnosworthy.freeagent.model.FreeAgentContactsWrapper;
+import com.karlnosworthy.freeagent.model.*;
 import retrofit.RequestInterceptor;
 import retrofit.RestAdapter;
 import retrofit.client.Response;
@@ -84,13 +82,13 @@ public class FreeAgentClient {
     }
 
     /**
-     * Returns a list of all the known contacts contained within FreeAgentService
+     * Returns a list of all the known contacts contained within FreeAgent
      * for the authorised account.
      *
      * @return A list of Contact instances.
      */
     public List<FreeAgentContact> getContacts() {
-        FreeAgentContactsWrapper contactsWrapper = freeAgentServiceInstance.listContacts();
+        FreeAgentContactsWrapper contactsWrapper = freeAgentServiceInstance.getContacts();
         if (contactsWrapper != null) {
             return contactsWrapper.getContactList();
         }
@@ -170,7 +168,7 @@ public class FreeAgentClient {
      */
     public boolean updateContact(FreeAgentContact contact) {
         if (contact != null) {
-            String contactId = extractIdentifier(contact);
+            String contactId = extractIdentifier(contact.getUrl());
 
             if (contactId != null && !contactId.isEmpty()) {
                 Response response = freeAgentServiceInstance.updateContact(new FreeAgentContactWrapper(contact), contactId);
@@ -192,7 +190,7 @@ public class FreeAgentClient {
      */
     public boolean deleteContact(FreeAgentContact contact) {
         if (contact != null) {
-            String contactId = extractIdentifier(contact);
+            String contactId = extractIdentifier(contact.getUrl());
 
             if (contactId != null && !contactId.isEmpty()) {
                 Response response = freeAgentServiceInstance.deleteContact(contactId);
@@ -206,6 +204,60 @@ public class FreeAgentClient {
         }
         return false;
     }
+
+    /**
+     * Retrieves the Contact associated with the specified project.
+     *
+     * @param project The populated project instance to retrieve the contact for.
+     * @return A populated FreeAgentContact instance or null if the contact could not be found.
+     */
+    public FreeAgentContact getContactForProject(FreeAgentProject project) {
+        if (project != null) {
+            String contactId = extractIdentifier(project.getContact());
+
+            if (contactId != null && !contactId.isEmpty()) {
+                FreeAgentContactWrapper contactWrapper = freeAgentServiceInstance.getContact(contactId);
+
+                if (contactWrapper != null) {
+                    return contactWrapper.getContact();
+                }
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Returns a list of all the known projects contained within FreeAgent
+     * for the authorised account.
+     *
+     * @return A list of Project instances.
+     */
+    public List<FreeAgentProject> getProjects() {
+        FreeAgentProjectsWrapper projectsWrapper = freeAgentServiceInstance.getProjects();
+
+        if (projectsWrapper != null) {
+            return projectsWrapper.getProjectList();
+        }
+        return null;
+    }
+
+    /**
+     * Retrieves the project that matches the specified id.
+     *
+     * @param projectId The id to match.
+     * @return A Project instance or null if the id supplied was invalid or could not be matched.
+     */
+    public FreeAgentProject getProject(String projectId) {
+        if (projectId != null && !projectId.isEmpty()) {
+            FreeAgentProjectWrapper projectWrapper = freeAgentServiceInstance.getProject(projectId);
+
+            if (projectWrapper != null) {
+                return projectWrapper.getProject();
+            }
+        }
+        return null;
+    }
+
 
 
     private FreeAgentClient(Credential oauthCredential, String apiURL) {
@@ -229,9 +281,9 @@ public class FreeAgentClient {
         freeAgentServiceInstance = restAdapter.create(FreeAgentService.class);
     }
 
-    public String extractIdentifier(FreeAgentContact contact) {
-        if (contact != null && contact.getUrl() != null && !contact.getUrl().isEmpty()) {
-            return contact.getUrl().substring(1 + contact.getUrl().lastIndexOf("/"));
+    public String extractIdentifier(String url) {
+        if (url != null && !url.isEmpty()) {
+            return url.substring(1 + url.lastIndexOf("/"));
         }
         return "";
     }

@@ -1,18 +1,16 @@
 package com.karlnosworthy.freeagent;
 
-import com.karlnosworthy.freeagent.model.FreeAgentContact;
-import com.karlnosworthy.freeagent.model.FreeAgentContactWrapper;
-import com.karlnosworthy.freeagent.model.FreeAgentContactsWrapper;
+import com.karlnosworthy.freeagent.model.*;
 import retrofit.client.Response;
 import retrofit.http.*;
 
 public interface FreeAgentService {
 
     //
-    // ==== Contacts ===
+    // ==== Contacts ====
     //
     @GET("/contacts/")
-    FreeAgentContactsWrapper listContacts();
+    FreeAgentContactsWrapper getContacts();
 
     @GET("/contacts/")
     FreeAgentContactsWrapper getContacts(@Query("view") String viewFilter);
@@ -31,6 +29,15 @@ public interface FreeAgentService {
 
     @DELETE("/contacts/{id}")
     Response deleteContact(@Path("id") String contactId);
+
+    //
+    // ==== Projects ====
+    //
+    @GET("/projects/")
+    FreeAgentProjectsWrapper getProjects();
+
+    @GET("/projects/{id}")
+    FreeAgentProjectWrapper getProject(@Path("id") String projectId);
 }
 
 
