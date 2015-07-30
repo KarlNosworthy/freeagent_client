@@ -1,0 +1,14 @@
+{
+  "url":"https://api.freeagent.com/v2/company",
+  "name":"My Company",
+  "subdomain":"mycompany",
+  "type":"UkLimitedCompany",
+  "currency":"GBP",
+  "mileage_units":"miles",
+  "company_start_date":"2010-05-01",
+  "freeagent_start_date":"2010-05-01",
+  "first_accounting_year_end":"2011-05-01",
+  "company_registration_number":"123456",
+  "sales_tax_registration_status":"Registered",
+  "sales_tax_registration_number":"123456"
+}

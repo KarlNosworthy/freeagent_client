@@ -12,10 +12,7 @@ import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.client.util.store.FileDataStoreFactory;
 import com.karlnosworthy.freeagent.model.*;
-import com.karlnosworthy.freeagent.model.wrapper.FreeAgentContactWrapper;
-import com.karlnosworthy.freeagent.model.wrapper.FreeAgentContactsWrapper;
-import com.karlnosworthy.freeagent.model.wrapper.FreeAgentProjectWrapper;
-import com.karlnosworthy.freeagent.model.wrapper.FreeAgentProjectsWrapper;
+import com.karlnosworthy.freeagent.model.wrapper.*;
 import retrofit.RequestInterceptor;
 import retrofit.RestAdapter;
 import retrofit.client.Response;
@@ -85,6 +82,21 @@ public class FreeAgentClient {
         } else {
             return null;
         }
+    }
+
+    /**
+     * Returns the basic information about the company contained within FreeAgent
+     * for the authorised account.
+     *
+     * @return A populated FreeAgentCompany instance or null.
+     */
+    public FreeAgentCompany getCompany() {
+        FreeAgentCompanyWrapper companyWrapper = freeAgentServiceInstance.getCompany();
+
+        if (companyWrapper != null) {
+            return companyWrapper.getCompany();
+        }
+        return null;
     }
 
     /**
@@ -280,8 +292,6 @@ public class FreeAgentClient {
         }
         return null;
     }
-
-
 
     private FreeAgentClient(Credential oauthCredential, String apiURL) {
         super();

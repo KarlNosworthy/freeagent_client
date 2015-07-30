@@ -1,13 +1,18 @@
 package com.karlnosworthy.freeagent;
 
-import com.karlnosworthy.freeagent.model.wrapper.FreeAgentContactWrapper;
-import com.karlnosworthy.freeagent.model.wrapper.FreeAgentContactsWrapper;
-import com.karlnosworthy.freeagent.model.wrapper.FreeAgentProjectWrapper;
-import com.karlnosworthy.freeagent.model.wrapper.FreeAgentProjectsWrapper;
+import com.karlnosworthy.freeagent.model.FreeAgentCompany;
+import com.karlnosworthy.freeagent.model.wrapper.*;
 import retrofit.client.Response;
 import retrofit.http.*;
 
 public interface FreeAgentService {
+
+    //
+    // ==== Company ====
+    //
+    @GET("/company")
+    FreeAgentCompanyWrapper getCompany();
+
 
     //
     // ==== Contacts ====
