@@ -11,9 +11,9 @@ import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.client.util.store.FileDataStoreFactory;
-import com.karlnosworthy.freeagent.model.Contact;
-import com.karlnosworthy.freeagent.model.ContactWrapper;
-import com.karlnosworthy.freeagent.model.ContactsWrapper;
+import com.karlnosworthy.freeagent.model.FreeAgentContact;
+import com.karlnosworthy.freeagent.model.FreeAgentContactWrapper;
+import com.karlnosworthy.freeagent.model.FreeAgentContactsWrapper;
 import retrofit.RequestInterceptor;
 import retrofit.RestAdapter;
 
@@ -62,10 +62,10 @@ public class FreeAgentClient {
                 .authorizationHeaderAccessMethod(),
                 HTTP_TRANSPORT,
                 JSON_FACTORY,
-                new GenericUrl("https://api.freeagent.com/v2/token_endpoint"),
+                new GenericUrl(apiURL + "/token_endpoint"),
                 new ClientParametersAuthentication(identifier, secret),
                 identifier,
-                "https://api.freeagent.com/v2/approve_app")
+                apiURL + "/approve_app")
                 .setDataStoreFactory(DATA_STORE_FACTORY).build();
 
         // authorize
@@ -88,8 +88,8 @@ public class FreeAgentClient {
      *
      * @return A list of Contact instances.
      */
-    public List<Contact> getContacts() {
-        ContactsWrapper contactsWrapper = freeAgentInstance.listContacts();
+    public List<FreeAgentContact> getContacts() {
+        FreeAgentContactsWrapper contactsWrapper = freeAgentInstance.listContacts();
         if (contactsWrapper != null) {
             return contactsWrapper.getContactList();
         }
@@ -103,8 +103,8 @@ public class FreeAgentClient {
      * @param viewType The view type {@link com.karlnosworthy.freeagent.FreeAgentClient.ContactViewType} filter to apply to the contacts
      * @return A list of Contact instances.
      */
-    public List<Contact> getContacts(ContactViewType viewType) {
-        ContactsWrapper contactsWrapper = freeAgentInstance.getContacts(viewType.identifier);
+    public List<FreeAgentContact> getContacts(ContactViewType viewType) {
+        FreeAgentContactsWrapper contactsWrapper = freeAgentInstance.getContacts(viewType.identifier);
         if (contactsWrapper != null) {
             return contactsWrapper.getContactList();
         }
@@ -119,8 +119,8 @@ public class FreeAgentClient {
      * @param sortOrderType The sort order {@link com.karlnosworthy.freeagent.FreeAgentClient.ContactSortOrderType} to apply to the contacts.
      * @return A list of Contact instances.
      */
-    public List<Contact> getContacts(ContactViewType viewType, ContactSortOrderType sortOrderType) {
-        ContactsWrapper contactsWrapper = freeAgentInstance.getContacts(viewType.identifier, sortOrderType.identifier);
+    public List<FreeAgentContact> getContacts(ContactViewType viewType, ContactSortOrderType sortOrderType) {
+        FreeAgentContactsWrapper contactsWrapper = freeAgentInstance.getContacts(viewType.identifier, sortOrderType.identifier);
         if (contactsWrapper != null) {
             return contactsWrapper.getContactList();
         }
@@ -133,9 +133,9 @@ public class FreeAgentClient {
      * @param contactId The id to match.
      * @return A Contact instance or null if the id supplied was invalid or could not be matched.
      */
-    public Contact getContact(Integer contactId) {
+    public FreeAgentContact getContact(Integer contactId) {
         if (contactId != null && contactId > 0) {
-            ContactWrapper contactWrapper = freeAgentInstance.getContact(contactId);
+            FreeAgentContactWrapper contactWrapper = freeAgentInstance.getContact(contactId);
             if (contactWrapper != null) {
                 return contactWrapper.getContact();
             }

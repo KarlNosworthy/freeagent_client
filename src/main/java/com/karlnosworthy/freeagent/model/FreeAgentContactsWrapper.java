@@ -5,18 +5,18 @@ import com.google.gson.annotations.SerializedName;
 
 import java.util.List;
 
-public class ContactsWrapper {
+public class FreeAgentContactsWrapper {
 
     @Expose
     @SerializedName("contacts")
-    private List<Contact> contactList;
+    private List<FreeAgentContact> contactList;
 
 
-    public List<Contact> getContactList() {
+    public List<FreeAgentContact> getContactList() {
         return contactList;
     }
 
-    public void setContactList(List<Contact> contactList) {
+    public void setContactList(List<FreeAgentContact> contactList) {
         this.contactList = contactList;
     }
 }

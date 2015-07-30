@@ -1,32 +1,32 @@
 package com.karlnosworthy.freeagent;
 
-import com.karlnosworthy.freeagent.model.Contact;
-import com.karlnosworthy.freeagent.model.ContactWrapper;
-import com.karlnosworthy.freeagent.model.ContactsWrapper;
+import com.karlnosworthy.freeagent.model.FreeAgentContact;
+import com.karlnosworthy.freeagent.model.FreeAgentContactWrapper;
+import com.karlnosworthy.freeagent.model.FreeAgentContactsWrapper;
 import retrofit.http.*;
 
 public interface FreeAgent {
 
     //
-    // ==== ContactsWrapper ===
+    // ==== Contacts ===
     //
     @GET("/contacts/")
-    ContactsWrapper listContacts();
+    FreeAgentContactsWrapper listContacts();
 
     @GET("/contacts/")
-    ContactsWrapper getContacts(@Query("view") String viewFilter);
+    FreeAgentContactsWrapper getContacts(@Query("view") String viewFilter);
 
     @GET("/contacts/")
-    ContactsWrapper getContacts(@Query("view") String viewFilter, @Query("sort") String sortOrder);
+    FreeAgentContactsWrapper getContacts(@Query("view") String viewFilter, @Query("sort") String sortOrder);
 
     @GET("/contacts/{id}")
-    ContactWrapper getContact(@Path("id") Integer contactId);
+    FreeAgentContactWrapper getContact(@Path("id") Integer contactId);
 
     @POST("/contacts")
-    ContactWrapper createContact(@Body Contact contact);
+    FreeAgentContactWrapper createContact(@Body FreeAgentContact contact);
 
     @PUT("/contacts/:{id}")
-    void updateContact(@Body Contact contact, @Path("id") Integer contactId);
+    void updateContact(@Body FreeAgentContact contact, @Path("id") Integer contactId);
 
     @DELETE("/contacts/:id")
     void deleteContact(@Path("id") Integer contactId);
