@@ -2,5 +2,5 @@ language: java
 jdk: oraclejdk7
 
 before_install: chmod +x ./gradlew
-
+install: ./gradlew assemble --stacktrace
 script: ./gradlew check
