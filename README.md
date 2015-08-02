@@ -87,6 +87,17 @@ String projectId = "Set your valid project identifier here";
 
 FreeAgentProject project = freeAgentClient.getProject(projectId);
 ```
+#### Filtering / Sorting
+
+To show only projects which are currently active
+```java
+List<FreeAgentProject> projects = freeAgentClient.getProjects(ProjectStatusType.Active);
+```
+To show only projects which are currently completed
+```java
+List<FreeAgentProject> projects = freeAgentClient.getProjects(ProjectStatusType.Completed);
+```
+
 To obtain the contact for a specific project
 ```java
 String projectId = "Set your valid project identifier here";
