@@ -43,8 +43,11 @@ public interface FreeAgentService {
     @GET("/projects/")
     FreeAgentProjectsWrapper getProjects();
 
+    @GET("/projects/")
+    FreeAgentProjectsWrapper getProjects(@Query("view") String viewFilter);
+
     @GET("/projects")
-    FreeAgentProjectsWrapper getProjects(@Query("contact") String contactURL);
+    FreeAgentProjectsWrapper getProjectsForContact(@Query("contact") String contactURL);
 
     @GET("/projects/{id}")
     FreeAgentProjectWrapper getProject(@Path("id") String projectId);

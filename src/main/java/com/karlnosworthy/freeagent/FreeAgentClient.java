@@ -260,6 +260,22 @@ public class FreeAgentClient {
     }
 
     /**
+     * Returns a list of all the known projects contained within FreeAgent
+     * for the authorised account.
+     *
+     * @param statusType The view type {@link com.karlnosworthy.freeagent.FreeAgentClient.ProjectStatusType} filter to apply to the projects.
+     * @return A list of Project instances.
+     */
+    public List<FreeAgentProject> getProjects(ProjectStatusType statusType) {
+        FreeAgentProjectsWrapper projectsWrapper = freeAgentServiceInstance.getProjects(statusType.identifier);
+
+        if (projectsWrapper != null) {
+            return projectsWrapper.getProjectList();
+        }
+        return null;
+    }
+
+    /**
      * Returns a list of projects that are associated with the specified contact.
      *
      * @param contact The contact instance to look up projects for.
@@ -268,7 +284,7 @@ public class FreeAgentClient {
     public List<FreeAgentProject> getProjects(FreeAgentContact contact) {
         if (contact != null && contact.getUrl() != null && !contact.getUrl().isEmpty()) {
 
-            FreeAgentProjectsWrapper projectsWrapper = freeAgentServiceInstance.getProjects(contact.getUrl());
+            FreeAgentProjectsWrapper projectsWrapper = freeAgentServiceInstance.getProjectsForContact(contact.getUrl());
             if (projectsWrapper != null) {
                 return projectsWrapper.getProjectList();
             }
@@ -415,5 +431,20 @@ public class FreeAgentClient {
         ContactSortOrderType(String identifier) {
             this.identifier = identifier;
         }
+    }
+
+    public enum ProjectStatusType {
+
+        Active("active"),
+        Completed("completed"),
+        Cancelled("cancelled"),
+        Hidden("hidden");
+
+        private String identifier;
+
+        ProjectStatusType(String identifier) {
+            this.identifier = identifier;
+        }
+
     }
 }
