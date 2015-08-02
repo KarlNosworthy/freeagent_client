@@ -2,7 +2,7 @@
 
 A Java based client for [FreeAgent](http://freeagent.com) that allows simple access to the API utilising the awesome [Retrofit](http://square.github.io/retrofit/).
 
-[![Build Status](https://travis-ci.org/KarlNosworthy/retrofit_freeagent_client.svg)](https://travis-ci.org/KarlNosworthy/retrofit_freeagent_client)
+[![Build Status](https://travis-ci.org/KarlNosworthy/freeagent_client.svg?branch=master)](https://travis-ci.org/KarlNosworthy/freeagent_client)
 
 Authentication is required before the client can be used and is performing using OAuth 2.0.
 
@@ -101,6 +101,29 @@ String contactId = "Set your valid contact identifier here";
 FreeAgentContact contact = freeAgentClient.getContact(contactId);
 List<FreeAgentProject> projects = freeAgentClient.getProjects(contact);
 ```
+#### Creating a new project
+```java
+FreeAgentProject project = new FreeAgentProject();
+project.setName("Test Project");
+project.setStatus("Active");
+project.setBudgetUnits("Days");
+project.setCurrency("GBP");
 
+// Associate an existing contact
+project.setContact(contact.getUrl());
 
+// a new project instance is returned with the identifier url and created_at timestamp set or null
+// returned if creation failed.
+FreeAgentProject createdProject = freeAgentClient.createProject(project);
+```
+#### Updating a project
+```java
+project.setBudgetUnits("Hours");
+project.setCurrency("EUR");
 
+boolean updateSuccessful = freeAgentClient.updateProject(project);
+```
+#### Deleting a project
+```java
+boolean deleteSuccessful = freeAgentClient.deleteProject(project);
+```
