@@ -293,6 +293,69 @@ public class FreeAgentClient {
         return null;
     }
 
+    /**
+     * Attempts to create a new project entry in the associated FreeAgent account.
+     *
+     * Will return null if the project instance provided is null or cannot be saved into the account.
+     *
+     * @param project The populated project instance.
+     * @return The updated project instance or null.
+     */
+    public FreeAgentProject createProject(FreeAgentProject project) {
+        if (project != null) {
+            FreeAgentProjectWrapper projectWrapper = freeAgentServiceInstance.createProject(new FreeAgentProjectWrapper(project));
+            if (projectWrapper != null) {
+                return projectWrapper.getProject();
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Attempts to update the specified project entry in the associated FreeAgent account.
+     *
+     * @param project The populated project instance.
+     * @return True if the project has been updated successfully, otherwise false.
+     */
+    public boolean updateProject(FreeAgentProject project) {
+        if (project != null) {
+            String projectId = extractIdentifier(project.getUrl());
+
+            if (projectId != null && !projectId.isEmpty()) {
+                Response response = freeAgentServiceInstance.updateProject(new FreeAgentProjectWrapper(project), projectId);
+                if (response.getStatus() == 200) {
+                    return true;
+                } else {
+                    return false;
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Attempts to delete the specified project entry in the associated FreeAgent account.
+     *
+     * @param project The populated project instance.
+     * @return True if the project has been deleted successfully, otherwise false.
+     */
+    public boolean deleteProject(FreeAgentProject project) {
+        if (project != null) {
+            String projectId = extractIdentifier(project.getUrl());
+
+            if (projectId != null && !projectId.isEmpty()) {
+                Response response = freeAgentServiceInstance.deleteProject(projectId);
+
+                if (response.getStatus() == 200) {
+                    return true;
+                } else {
+                    return false;
+                }
+            }
+        }
+        return false;
+    }
+
     private FreeAgentClient(Credential oauthCredential, String apiURL) {
         super();
         this.credential = oauthCredential;

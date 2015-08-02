@@ -12,6 +12,16 @@ public class FreeAgentProjectWrapper {
     @SerializedName("project")
     private FreeAgentProject project;
 
+
+    public FreeAgentProjectWrapper() {
+        super();
+    }
+
+    public FreeAgentProjectWrapper(FreeAgentProject project) {
+        super();
+        this.project = project;
+    }
+
     public FreeAgentProject getProject() {
         return project;
     }

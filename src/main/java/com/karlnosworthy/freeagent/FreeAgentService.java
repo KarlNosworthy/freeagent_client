@@ -13,7 +13,6 @@ public interface FreeAgentService {
     @GET("/company")
     FreeAgentCompanyWrapper getCompany();
 
-
     //
     // ==== Contacts ====
     //
@@ -49,6 +48,15 @@ public interface FreeAgentService {
 
     @GET("/projects/{id}")
     FreeAgentProjectWrapper getProject(@Path("id") String projectId);
+
+    @POST("/projects")
+    FreeAgentProjectWrapper createProject(@Body FreeAgentProjectWrapper project);
+
+    @PUT("/projects/{id}")
+    Response updateProject(@Body FreeAgentProjectWrapper project, @Path("id") String projectId);
+
+    @DELETE("/projects/{id}")
+    Response deleteProject(@Path("id") String projectId);
 }
 
 
