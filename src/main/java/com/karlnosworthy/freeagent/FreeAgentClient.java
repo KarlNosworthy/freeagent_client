@@ -372,6 +372,52 @@ public class FreeAgentClient {
         return false;
     }
 
+    /**
+     * Returns a list of all the known users contained within FreeAgent
+     * for the authorised account.
+     *
+     * @return A list of User instances.
+     */
+    public List<FreeAgentUser> getUsers() {
+        FreeAgentUsersWrapper usersWrapper = freeAgentServiceInstance.getUsers();
+
+        if (usersWrapper != null) {
+            return usersWrapper.getUserList();
+        }
+        return null;
+    }
+
+    /**
+     * Retrieves the users that matches the specified id.
+     *
+     * @param userId The id to match.
+     * @return A User instance or null if the id supplied was invalid or could not be matched.
+     */
+    public FreeAgentUser getUser(String userId) {
+        if (userId != null && !userId.isEmpty()) {
+            FreeAgentUserWrapper userWrapper = freeAgentServiceInstance.getUser(userId);
+            if (userWrapper != null) {
+                return userWrapper.getUser();
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Retrieves the information about the current user/personal profile contained within
+     * the FreeAgent authorised account.
+     *
+     * @return The current user/personal profile or null if the profile could not be obtained.
+     */
+    public FreeAgentUser getPersonalProfile() {
+        FreeAgentUserWrapper userWrapper = freeAgentServiceInstance.getCurrentUser();
+
+        if (userWrapper != null) {
+            return userWrapper.getUser();
+        }
+        return null;
+    }
+
     private FreeAgentClient(Credential oauthCredential, String apiURL) {
         super();
         this.credential = oauthCredential;

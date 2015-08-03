@@ -1,6 +1,7 @@
 package com.karlnosworthy.freeagent;
 
 import com.karlnosworthy.freeagent.model.FreeAgentCompany;
+import com.karlnosworthy.freeagent.model.FreeAgentUser;
 import com.karlnosworthy.freeagent.model.wrapper.*;
 import retrofit.client.Response;
 import retrofit.http.*;
@@ -60,6 +61,18 @@ public interface FreeAgentService {
 
     @DELETE("/projects/{id}")
     Response deleteProject(@Path("id") String projectId);
+
+    //
+    // ==== Users ====
+    //
+    @GET("/users/")
+    FreeAgentUsersWrapper getUsers();
+
+    @GET("/users/{id}")
+    FreeAgentUserWrapper getUser(@Path("id") String userId);
+
+    @GET("/users/me")
+    FreeAgentUserWrapper getCurrentUser();
 }
 
 
