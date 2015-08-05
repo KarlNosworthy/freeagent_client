@@ -40,7 +40,7 @@ public class FreeAgentClient {
 
     private static final String LOCALHOST = "127.0.0.1"; // NOPMD
 
-    private static final File DATA_STORE_DIR = new File(System.getProperty("user.home"), ".store/oauth2_sample");
+    private static final File DATA_STORE_DIR = new File(System.getProperty("user.home"), ".store/oauth2");
 
     private static final HttpTransport HTTP_TRANSPORT = new NetHttpTransport();
     private static final JsonFactory JSON_FACTORY = new JacksonFactory();
@@ -214,6 +214,9 @@ public class FreeAgentClient {
      * Attempts to import a new contact into the associated FreeAgent account by deserialising the specified
      * JSON contact information and requesting a new contact be created.
      *
+     * NOTE: The import (creation within FreeAgent) will only be actioned if no URL property is present or if the
+     *       URL property is not populated. Otherwise null will be returned.
+     *
      * @param contactJSON A string containing contact information in FreeAgent friendly format.
      * @return The newly populated contact instance that has been imported into FreeAgent or null.
      * @throws JsonSyntaxException If the format does not match the FreeAgent V2 Contact format.
@@ -382,6 +385,50 @@ public class FreeAgentClient {
                 return projectWrapper.getProject();
             }
         }
+        return null;
+    }
+
+    /**
+     * Builds a new project instance from the specified JSON string. The instance has not been
+     * sent to FreeAgent.
+     *
+     * @param projectJSON A string containing project information in FreeAgent friendly format.
+     * @return A populated project instance or null if the projectJSON is empty.
+     * @throws JsonSyntaxException If the format does not match the FreeAgent V2 Project format.
+     */
+    public FreeAgentProject buildProject(String projectJSON) throws JsonSyntaxException {
+        if (projectJSON == null || projectJSON.isEmpty()) {
+            return null;
+        }
+        return new GsonBuilder().create().fromJson(projectJSON, FreeAgentProject.class);
+    }
+
+    /**
+     * Attempts to import a new project into the associated FreeAgent account by deserialising the specified
+     * JSON project information and requesting a new project be created.
+     *
+     * NOTE: The import (creation within FreeAgent) will only be actioned if no URL property is present or if the
+     *       URL property is not populated. Otherwise null will be returned.
+     *
+     * @param projectJSON A string containing project information in FreeAgent friendly format.
+     * @return The newly populated project instance that has been imported into FreeAgent or null.
+     * @throws JsonSyntaxException If the format does not match the FreeAgent V2 Project format.
+     */
+    public FreeAgentProject importProject(String projectJSON) throws JsonSyntaxException {
+        if (projectJSON == null || projectJSON.isEmpty()) {
+            return null;
+        }
+
+        FreeAgentProject project = buildProject(projectJSON);
+
+        if (project != null && (project.getUrl() == null || project.getUrl().isEmpty())) {
+            FreeAgentProjectWrapper projectWrapper = freeAgentServiceInstance.createProject(new FreeAgentProjectWrapper(project));
+
+            if (projectWrapper != null) {
+                return projectWrapper.getProject();
+            }
+        }
+
         return null;
     }
 
