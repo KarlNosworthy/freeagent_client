@@ -9,8 +9,7 @@ Authentication is required before the client can be used and is performing using
 ## Obtaining an authenticated client
 ```java
 FreeAgentClient freeAgentClient = FreeAgentClient.authorise("OAuth Key here",
-                                                            "OAuth Secret Here",
-                                                            "API URL here");
+                                                            "OAuth Secret Here");
 ```
 
 Once you have an authenticated instance you can use it to access the various entities and rich information that FreeAgent 
@@ -138,3 +137,24 @@ boolean updateSuccessful = freeAgentClient.updateProject(project);
 ```java
 boolean deleteSuccessful = freeAgentClient.deleteProject(project);
 ```
+
+## Using JSON
+
+If you have data thats in FreeAgent API V2 compliant JSON then you can build and/or import most entities via the client.
+
+For example, to build a new FreeAgentContact instance from JSON
+```java
+String loadedJSON = "...";
+
+FreeAgentContact contact = freeAgentClient.buildContact(loadedJSON);
+```
+To build and automatically import a new FreeAgentContact
+```java
+String loadedJSON = "...";
+
+FreeAgentContact contact = freeAgentClient.importContact(loadedJSON);
+```
+
+
+
+
