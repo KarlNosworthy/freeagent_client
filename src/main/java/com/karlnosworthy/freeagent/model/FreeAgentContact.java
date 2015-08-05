@@ -5,6 +5,8 @@ import javax.annotation.Generated;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
+import java.util.List;
+
 @Generated("org.jsonschema2pojo")
 public class FreeAgentContact {
 

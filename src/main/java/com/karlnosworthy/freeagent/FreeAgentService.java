@@ -18,13 +18,13 @@ public interface FreeAgentService {
     // ==== Contacts ====
     //
     @GET("/contacts/")
-    FreeAgentContactsWrapper getContacts();
+    FreeAgentContactWrapper getContacts();
 
     @GET("/contacts/")
-    FreeAgentContactsWrapper getContacts(@Query("view") String viewFilter);
+    FreeAgentContactWrapper getContacts(@Query("view") String viewFilter);
 
     @GET("/contacts/")
-    FreeAgentContactsWrapper getContacts(@Query("view") String viewFilter, @Query("sort") String sortOrder);
+    FreeAgentContactWrapper getContacts(@Query("view") String viewFilter, @Query("sort") String sortOrder);
 
     @GET("/contacts/{id}")
     FreeAgentContactWrapper getContact(@Path("id") String contactId);
@@ -42,13 +42,13 @@ public interface FreeAgentService {
     // ==== Projects ====
     //
     @GET("/projects/")
-    FreeAgentProjectsWrapper getProjects();
+    FreeAgentProjectWrapper getProjects();
 
     @GET("/projects/")
-    FreeAgentProjectsWrapper getProjects(@Query("view") String viewFilter);
+    FreeAgentProjectWrapper getProjects(@Query("view") String viewFilter);
 
     @GET("/projects")
-    FreeAgentProjectsWrapper getProjectsForContact(@Query("contact") String contactURL);
+    FreeAgentProjectWrapper getProjectsForContact(@Query("contact") String contactURL);
 
     @GET("/projects/{id}")
     FreeAgentProjectWrapper getProject(@Path("id") String projectId);
@@ -66,7 +66,7 @@ public interface FreeAgentService {
     // ==== Users ====
     //
     @GET("/users/")
-    FreeAgentUsersWrapper getUsers();
+    FreeAgentUserWrapper getUsers();
 
     @GET("/users/{id}")
     FreeAgentUserWrapper getUser(@Path("id") String userId);

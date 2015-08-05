@@ -50,6 +50,18 @@ public class FreeAgentClient {
      *
      * @param identifier The identifier to use for OAuth authentication and FreeAgentService recognition.
      * @param secret The secret to use for OAuth authentication.
+     * @return An authenticated instance which is ready to use or null
+     * @throws IOException Thrown a problem is encountered during the OAuth process.
+     */
+    public static FreeAgentClient authorise(String identifier, String secret) throws IOException {
+        return authorise(identifier, secret, LIVE_URL);
+    }
+
+    /**
+     * Authorises, initialises and returns a new FreeAgentClient instance.
+     *
+     * @param identifier The identifier to use for OAuth authentication and FreeAgentService recognition.
+     * @param secret The secret to use for OAuth authentication.
      * @param apiURL The URL of the API to target {@link #LIVE_URL}, {@link #SANDBOX_URL} etc.
      * @return An authenticated instance which is ready to use or null
      * @throws IOException Thrown a problem is encountered during the OAuth process.
@@ -106,9 +118,9 @@ public class FreeAgentClient {
      * @return A list of Contact instances.
      */
     public List<FreeAgentContact> getContacts() {
-        FreeAgentContactsWrapper contactsWrapper = freeAgentServiceInstance.getContacts();
+        FreeAgentContactWrapper contactsWrapper = freeAgentServiceInstance.getContacts();
         if (contactsWrapper != null) {
-            return contactsWrapper.getContactList();
+            return contactsWrapper.getContacts();
         }
         return null;
     }
@@ -121,9 +133,9 @@ public class FreeAgentClient {
      * @return A list of Contact instances.
      */
     public List<FreeAgentContact> getContacts(ContactViewType viewType) {
-        FreeAgentContactsWrapper contactsWrapper = freeAgentServiceInstance.getContacts(viewType.identifier);
+        FreeAgentContactWrapper contactsWrapper = freeAgentServiceInstance.getContacts(viewType.identifier);
         if (contactsWrapper != null) {
-            return contactsWrapper.getContactList();
+            return contactsWrapper.getContacts();
         }
         return null;
     }
@@ -137,9 +149,9 @@ public class FreeAgentClient {
      * @return A list of Contact instances.
      */
     public List<FreeAgentContact> getContacts(ContactViewType viewType, ContactSortOrderType sortOrderType) {
-        FreeAgentContactsWrapper contactsWrapper = freeAgentServiceInstance.getContacts(viewType.identifier, sortOrderType.identifier);
+        FreeAgentContactWrapper contactsWrapper = freeAgentServiceInstance.getContacts(viewType.identifier, sortOrderType.identifier);
         if (contactsWrapper != null) {
-            return contactsWrapper.getContactList();
+            return contactsWrapper.getContacts();
         }
         return null;
     }
@@ -251,10 +263,10 @@ public class FreeAgentClient {
      * @return A list of Project instances.
      */
     public List<FreeAgentProject> getProjects() {
-        FreeAgentProjectsWrapper projectsWrapper = freeAgentServiceInstance.getProjects();
+        FreeAgentProjectWrapper projectsWrapper = freeAgentServiceInstance.getProjects();
 
         if (projectsWrapper != null) {
-            return projectsWrapper.getProjectList();
+            return projectsWrapper.getProjects();
         }
         return null;
     }
@@ -267,10 +279,10 @@ public class FreeAgentClient {
      * @return A list of Project instances.
      */
     public List<FreeAgentProject> getProjects(ProjectStatusType statusType) {
-        FreeAgentProjectsWrapper projectsWrapper = freeAgentServiceInstance.getProjects(statusType.identifier);
+        FreeAgentProjectWrapper projectsWrapper = freeAgentServiceInstance.getProjects(statusType.identifier);
 
         if (projectsWrapper != null) {
-            return projectsWrapper.getProjectList();
+            return projectsWrapper.getProjects();
         }
         return null;
     }
@@ -284,9 +296,9 @@ public class FreeAgentClient {
     public List<FreeAgentProject> getProjects(FreeAgentContact contact) {
         if (contact != null && contact.getUrl() != null && !contact.getUrl().isEmpty()) {
 
-            FreeAgentProjectsWrapper projectsWrapper = freeAgentServiceInstance.getProjectsForContact(contact.getUrl());
+            FreeAgentProjectWrapper projectsWrapper = freeAgentServiceInstance.getProjectsForContact(contact.getUrl());
             if (projectsWrapper != null) {
-                return projectsWrapper.getProjectList();
+                return projectsWrapper.getProjects();
             }
         }
         return null;
@@ -379,10 +391,10 @@ public class FreeAgentClient {
      * @return A list of User instances.
      */
     public List<FreeAgentUser> getUsers() {
-        FreeAgentUsersWrapper usersWrapper = freeAgentServiceInstance.getUsers();
+        FreeAgentUserWrapper usersWrapper = freeAgentServiceInstance.getUsers();
 
         if (usersWrapper != null) {
-            return usersWrapper.getUserList();
+            return usersWrapper.getUsers();
         }
         return null;
     }
@@ -416,6 +428,24 @@ public class FreeAgentClient {
             return userWrapper.getUser();
         }
         return null;
+    }
+
+    public static void main(String[] args) {
+        try {
+            FreeAgentClient freeAgentClient = FreeAgentClient.authorise("dEJBD4iZLCoFKaqSZVfdww", "R-n5FzqKisHhD7fve-PhRQ");
+
+            if (freeAgentClient != null) {
+                List<FreeAgentProject> projects = freeAgentClient.getProjects();
+
+                System.out.println("Here we are");
+            }
+            return;
+        } catch (IOException e) {
+            System.err.println(e.getMessage());
+        } catch (Throwable t) {
+            t.printStackTrace();
+        }
+        System.exit(1);
     }
 
     private FreeAgentClient(Credential oauthCredential, String apiURL) {

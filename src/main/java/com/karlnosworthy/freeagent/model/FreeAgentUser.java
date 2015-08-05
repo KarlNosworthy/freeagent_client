@@ -197,4 +197,5 @@ public class FreeAgentUser {
     public void setCreatedAt(String createdAt) {
         this.createdAt = createdAt;
     }
+
 }

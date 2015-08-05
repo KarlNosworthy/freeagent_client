@@ -302,4 +302,5 @@ public class FreeAgentProject {
     public void setUpdatedAt(String updatedAt) {
         this.updatedAt = updatedAt;
     }
+
 }
