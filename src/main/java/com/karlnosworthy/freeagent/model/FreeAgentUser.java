@@ -5,7 +5,6 @@ import javax.annotation.Generated;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
-@Generated("org.jsonschema2pojo")
 public class FreeAgentUser {
 
     @SerializedName("url")
@@ -35,6 +34,14 @@ public class FreeAgentUser {
     @SerializedName("created_at")
     @Expose
     private String createdAt;
+
+    @Expose
+    @SerializedName("password")
+    private String password;
+
+    @Expose
+    @SerializedName("password_confirmation")
+    private String passwordConfirmation;
 
     /**
      * 
@@ -142,6 +149,23 @@ public class FreeAgentUser {
      */
     public void setPermissionLevel(Integer permissionLevel) {
         this.permissionLevel = permissionLevel;
+    }
+
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public String getPasswordConfirmation() {
+        return passwordConfirmation;
+    }
+
+    public void setPasswordConfirmation(String passwordConfirmation) {
+        this.passwordConfirmation = passwordConfirmation;
     }
 
     /**

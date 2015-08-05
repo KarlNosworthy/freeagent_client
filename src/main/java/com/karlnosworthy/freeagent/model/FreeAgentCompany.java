@@ -6,7 +6,6 @@ import com.google.gson.annotations.SerializedName;
 
 import java.util.List;
 
-@Generated("org.jsonschema2pojo")
 public class FreeAgentCompany {
 
     @SerializedName("url")

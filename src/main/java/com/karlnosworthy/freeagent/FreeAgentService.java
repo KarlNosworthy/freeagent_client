@@ -73,6 +73,15 @@ public interface FreeAgentService {
 
     @GET("/users/me")
     FreeAgentUserWrapper getCurrentUser();
+
+    @POST("/users")
+    FreeAgentUserWrapper createUser(@Body FreeAgentUserWrapper user);
+
+    @PUT("/users/{id}")
+    Response updateUser(@Body FreeAgentUserWrapper user, @Path("id") String userId);
+
+    @DELETE("/users/{id}")
+    Response deleteUser(@Path("id") String userId);
 }
 
 

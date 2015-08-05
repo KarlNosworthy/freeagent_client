@@ -523,6 +523,113 @@ public class FreeAgentClient {
         return null;
     }
 
+    /**
+     * Attempts to create a new user entry in the associated FreeAgent account.
+     *
+     * Will return null if the user instance provided is null or cannot be saved into the account.
+     *
+     * @param user The populated user instance.
+     * @return The updated user instance or null.
+     */
+    public FreeAgentUser createUser(FreeAgentUser user) {
+        if (user != null) {
+            FreeAgentUserWrapper userWrapper = freeAgentServiceInstance.createUser(new FreeAgentUserWrapper(user));
+            if (userWrapper != null) {
+                return userWrapper.getUser();
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Attempts to update the specified user entry in the associated FreeAgent account.
+     *
+     * @param user The populated user instance.
+     * @return True if the user has been updated successfully, otherwise false.
+     */
+    public boolean updateUser(FreeAgentUser user) {
+        if (user != null) {
+            String userId = extractIdentifier(user.getUrl());
+
+            if (userId != null && !userId.isEmpty()) {
+                Response response = freeAgentServiceInstance.updateUser(new FreeAgentUserWrapper(user), userId);
+                if (response.getStatus() == 200) {
+                    return true;
+                } else {
+                    return false;
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Attempts to delete the specified user entry in the associated FreeAgent account.
+     *
+     * @param user The populated user instance.
+     * @return True if the user has been deleted successfully, otherwise false.
+     */
+    public boolean deleteUser(FreeAgentUser user) {
+        if (user != null) {
+            String userId = extractIdentifier(user.getUrl());
+
+            if (userId != null && !userId.isEmpty()) {
+                Response response = freeAgentServiceInstance.deleteUser(userId);
+
+                if (response.getStatus() == 200) {
+                    return true;
+                } else {
+                    return false;
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Builds a new user instance from the specified JSON string. The instance has not been
+     * sent to FreeAgent.
+     *
+     * @param userJSON A string containing user information in FreeAgent friendly format.
+     * @return A populated user instance or null if the userJSON is empty.
+     * @throws JsonSyntaxException If the format does not match the FreeAgent V2 User format.
+     */
+    public FreeAgentUser buildUser(String userJSON) throws JsonSyntaxException {
+        if (userJSON == null || userJSON.isEmpty()) {
+            return null;
+        }
+        return new GsonBuilder().create().fromJson(userJSON, FreeAgentUser.class);
+    }
+
+    /**
+     * Attempts to import a new user into the associated FreeAgent account by deserialising the specified
+     * JSON user information and requesting a new user be created.
+     *
+     * NOTE: The import (creation within FreeAgent) will only be actioned if no URL property is present or if the
+     *       URL property is not populated. Otherwise null will be returned.
+     *
+     * @param userJSON A string containing user information in FreeAgent friendly format.
+     * @return The newly populated user instance that has been imported into FreeAgent or null.
+     * @throws JsonSyntaxException If the format does not match the FreeAgent V2 User format.
+     */
+    public FreeAgentUser importUser(String userJSON) throws JsonSyntaxException {
+        if (userJSON == null || userJSON.isEmpty()) {
+            return null;
+        }
+
+        FreeAgentUser user = buildUser(userJSON);
+
+        if (user != null && (user.getUrl() == null || user.getUrl().isEmpty())) {
+            FreeAgentUserWrapper userWrapper = freeAgentServiceInstance.createUser(new FreeAgentUserWrapper(user));
+
+            if (userWrapper != null) {
+                return userWrapper.getUser();
+            }
+        }
+
+        return null;
+    }
+
     private FreeAgentClient(Credential oauthCredential, String apiURL) {
         super();
         this.credential = oauthCredential;
@@ -597,5 +704,17 @@ public class FreeAgentClient {
             this.identifier = identifier;
         }
 
+    }
+
+    public enum UserPermissionType {
+        NoAccess,
+        Time,
+        MyMoney,
+        ContactsAndProjects,
+        InvoicesEstimatesAndFiles,
+        Bills,
+        Banking,
+        TaxAccountingAndUsers,
+        Full
     }
 }
