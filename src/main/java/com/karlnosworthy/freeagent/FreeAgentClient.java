@@ -11,6 +11,9 @@ import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.client.util.store.FileDataStoreFactory;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonSyntaxException;
 import com.karlnosworthy.freeagent.model.*;
 import com.karlnosworthy.freeagent.model.wrapper.*;
 import retrofit.RequestInterceptor;
@@ -19,6 +22,8 @@ import retrofit.client.Response;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.List;
 
 
@@ -187,6 +192,49 @@ public class FreeAgentClient {
                 return contactWrapper.getContact();
             }
         }
+        return null;
+    }
+
+    /**
+     * Builds a new contact instance from the specified JSON string. The instance has not been
+     * sent to FreeAgent.
+     *
+     * @param contactJSON A string containing contact information in FreeAgent friendly format.
+     * @return A populated contact instance or null if the contactJSON is empty.
+     * @throws JsonSyntaxException If the format does not match the FreeAgent V2 Contact format.
+     */
+    public FreeAgentContact buildContact(String contactJSON) throws JsonSyntaxException {
+        if (contactJSON == null || contactJSON.isEmpty()) {
+            return null;
+        }
+        return new GsonBuilder().create().fromJson(contactJSON, FreeAgentContact.class);
+    }
+
+    /**
+     * Attempts to import a new contact into the associated FreeAgent account by deserialising the specified
+     * JSON contact information and requesting a new contact be created.
+     *
+     * @param contactJSON A string containing contact information in FreeAgent friendly format.
+     * @return The newly populated contact instance that has been imported into FreeAgent or null.
+     * @throws JsonSyntaxException If the format does not match the FreeAgent V2 Contact format.
+     */
+    public FreeAgentContact importContact(String contactJSON) throws JsonSyntaxException {
+        if (contactJSON == null || contactJSON.isEmpty()) {
+            return null;
+        }
+
+        FreeAgentContact contact = buildContact(contactJSON);
+
+        if (contact != null) {
+            if (contact.getUrl() == null || contact.getUrl().isEmpty()) {
+                FreeAgentContactWrapper contactWrapper = freeAgentServiceInstance.createContact(new FreeAgentContactWrapper(contact));
+
+                if (contactWrapper != null) {
+                    return contactWrapper.getContact();
+                }
+            }
+        }
+
         return null;
     }
 
