@@ -144,16 +144,30 @@ If you have data thats in FreeAgent API V2 compliant JSON then you can build and
 
 For example, to build a new FreeAgentContact instance from JSON
 ```java
-String loadedJSON = "...";
+String loadedContactJSON = "...";
 
-FreeAgentContact contact = freeAgentClient.buildContact(loadedJSON);
+FreeAgentContact contact = freeAgentClient.buildContact(loadedContactJSON);
 ```
 To build and automatically import a new FreeAgentContact
 ```java
-String loadedJSON = "...";
+String loadedContactJSON = "...";
 
-FreeAgentContact contact = freeAgentClient.importContact(loadedJSON);
+FreeAgentContact contact = freeAgentClient.importContact(loadedContactJSON);
 ```
+
+Or to do the same with projects
+
+```java
+String loadedProjectJSON = "..."
+
+FreeAgentProject project = freeAgentClient.buildProject(loadedProjectJSON);
+```
+```java
+String loadedProjectJSON = "..."
+
+FreeAgentProject project = freeAgentClient.importProject(loadedProjectJSON);
+```
+
 
 
 
