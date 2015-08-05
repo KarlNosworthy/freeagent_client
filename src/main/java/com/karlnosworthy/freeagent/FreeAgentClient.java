@@ -430,24 +430,6 @@ public class FreeAgentClient {
         return null;
     }
 
-    public static void main(String[] args) {
-        try {
-            FreeAgentClient freeAgentClient = FreeAgentClient.authorise("dEJBD4iZLCoFKaqSZVfdww", "R-n5FzqKisHhD7fve-PhRQ");
-
-            if (freeAgentClient != null) {
-                List<FreeAgentProject> projects = freeAgentClient.getProjects();
-
-                System.out.println("Here we are");
-            }
-            return;
-        } catch (IOException e) {
-            System.err.println(e.getMessage());
-        } catch (Throwable t) {
-            t.printStackTrace();
-        }
-        System.exit(1);
-    }
-
     private FreeAgentClient(Credential oauthCredential, String apiURL) {
         super();
         this.credential = oauthCredential;
