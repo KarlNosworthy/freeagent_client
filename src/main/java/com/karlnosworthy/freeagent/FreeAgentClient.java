@@ -225,13 +225,11 @@ public class FreeAgentClient {
 
         FreeAgentContact contact = buildContact(contactJSON);
 
-        if (contact != null) {
-            if (contact.getUrl() == null || contact.getUrl().isEmpty()) {
-                FreeAgentContactWrapper contactWrapper = freeAgentServiceInstance.createContact(new FreeAgentContactWrapper(contact));
+        if (contact != null && (contact.getUrl() == null || contact.getUrl().isEmpty())) {
+            FreeAgentContactWrapper contactWrapper = freeAgentServiceInstance.createContact(new FreeAgentContactWrapper(contact));
 
-                if (contactWrapper != null) {
-                    return contactWrapper.getContact();
-                }
+            if (contactWrapper != null) {
+                return contactWrapper.getContact();
             }
         }
 
