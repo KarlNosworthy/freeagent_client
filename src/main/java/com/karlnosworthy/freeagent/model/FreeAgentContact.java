@@ -85,6 +85,40 @@ public class FreeAgentContact {
     @Expose
     private String updatedAt;
 
+
+    public FreeAgentContact() {
+        super();
+    }
+
+    public FreeAgentContact(FreeAgentContact contactToCopy) {
+        super();
+        this.url = contactToCopy.getUrl();
+        this.firstName = contactToCopy.getFirstName();
+        this.lastName = contactToCopy.getLastName();
+        this.organisationName = contactToCopy.getOrganisationName();
+        this.email = contactToCopy.getEmail();
+        this.billingEmail = contactToCopy.getBillingEmail();
+        this.phoneNumber = contactToCopy.getPhoneNumber();
+        this.mobile = contactToCopy.getMobile();
+        this.address1 = contactToCopy.getAddress1();
+        this.address2 = contactToCopy.getAddress2();
+        this.address3 = contactToCopy.getAddress3();
+        this.town = contactToCopy.getTown();
+        this.region = contactToCopy.getRegion();
+        this.postcode = contactToCopy.getPostcode();
+        this.country = contactToCopy.getCountry();
+        this.contactNameOnInvoices = contactToCopy.getContactNameOnInvoices();
+        this.locale = contactToCopy.getLocale();
+        this.accountBalance = contactToCopy.getAccountBalance();
+        this.usesContactInvoiceSequence = contactToCopy.getUsesContactInvoiceSequence();
+        this.chargeSalesTax = contactToCopy.getChargeSalesTax();
+        this.salesTaxRegistrationNumber = contactToCopy.getSalesTaxRegistrationNumber();
+        this.activeProjectsCount = contactToCopy.getActiveProjectsCount();
+        this.status = contactToCopy.getStatus();
+        this.createdAt = contactToCopy.getCreatedAt();
+        this.updatedAt = contactToCopy.getUpdatedAt();
+    }
+
     /**
      * 
      * @return
