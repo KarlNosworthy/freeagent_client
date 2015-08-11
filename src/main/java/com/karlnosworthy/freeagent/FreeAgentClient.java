@@ -13,6 +13,7 @@ import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.client.util.store.FileDataStoreFactory;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
+import com.google.gson.reflect.TypeToken;
 import com.karlnosworthy.freeagent.model.*;
 import com.karlnosworthy.freeagent.model.wrapper.*;
 import retrofit.RequestInterceptor;
@@ -21,6 +22,7 @@ import retrofit.client.Response;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Type;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
@@ -542,10 +544,8 @@ public class FreeAgentClient {
         return null;
     }
 
-
-
     /**
-     * Builds a new project instance from the specified JSON string. The instance has not been
+     * Builds a new invoice instance from the specified JSON string. The instance has not been
      * sent to FreeAgent.
      *
      * @param invoiceJSON A string containing invoice information in FreeAgent friendly format.
@@ -557,6 +557,23 @@ public class FreeAgentClient {
             return null;
         }
         return new GsonBuilder().create().fromJson(invoiceJSON, FreeAgentInvoice.class);
+    }
+
+    /**
+     * Builds a list of new invoice instances from the specified JSON string. The instance has not been
+     * sent to FreeAgent.
+     *
+     * @param invoicesJSON A string containing the collection of invoice information in FreeAgent friendly format.
+     * @return A list of populated invoice instances or null if the invoicesJSON is empty.
+     * @throws JsonSyntaxException If the format does not match the FreeAgent V2 Invoice format.
+     */
+    public List<FreeAgentInvoice> buildInvoices(String invoicesJSON) throws JsonSyntaxException {
+        if (invoicesJSON == null || invoicesJSON.isEmpty()) {
+            return null;
+        }
+
+        Type collectionType = new TypeToken<List<FreeAgentInvoice>>(){}.getType();
+        return new GsonBuilder().create().fromJson(invoicesJSON, collectionType);
     }
 
     /**
