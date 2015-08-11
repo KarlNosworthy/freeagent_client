@@ -11,7 +11,6 @@ import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.client.util.store.FileDataStoreFactory;
-import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
 import com.karlnosworthy.freeagent.model.*;
@@ -22,9 +21,10 @@ import retrofit.client.Response;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
+import java.util.TimeZone;
 
 
 /**
@@ -42,6 +42,7 @@ public class FreeAgentClient {
 
     private static final File DATA_STORE_DIR = new File(System.getProperty("user.home"), ".store/oauth2");
 
+    private SimpleDateFormat dateFormat;
     private static final HttpTransport HTTP_TRANSPORT = new NetHttpTransport();
     private static final JsonFactory JSON_FACTORY = new JacksonFactory();
     private static FileDataStoreFactory DATA_STORE_FACTORY;
@@ -59,7 +60,7 @@ public class FreeAgentClient {
      * @throws IOException Thrown a problem is encountered during the OAuth process.
      */
     public static FreeAgentClient authorise(String identifier, String secret) throws IOException {
-        return authorise(identifier, secret, LIVE_URL);
+        return authorise(identifier, secret, LIVE_URL, false);
     }
 
     /**
@@ -68,10 +69,11 @@ public class FreeAgentClient {
      * @param identifier The identifier to use for OAuth authentication and FreeAgentService recognition.
      * @param secret The secret to use for OAuth authentication.
      * @param apiURL The URL of the API to target {@link #LIVE_URL}, {@link #SANDBOX_URL} etc.
+     * @param loggingEnabled Should logging be enabled.
      * @return An authenticated instance which is ready to use or null
      * @throws IOException Thrown a problem is encountered during the OAuth process.
      */
-    public static FreeAgentClient authorise(String identifier, String secret, String apiURL) throws IOException {
+    public static FreeAgentClient authorise(String identifier, String secret, String apiURL, boolean loggingEnabled) throws IOException {
 
         if (DATA_STORE_FACTORY == null) {
             DATA_STORE_FACTORY = new FileDataStoreFactory(DATA_STORE_DIR);
@@ -95,7 +97,7 @@ public class FreeAgentClient {
         final Credential credential = new AuthorizationCodeInstalledApp(flow, receiver).authorize("user");
 
         if (credential != null) {
-            return new FreeAgentClient(credential, apiURL);
+            return new FreeAgentClient(credential, apiURL, loggingEnabled);
         } else {
             return null;
         }
@@ -252,6 +254,7 @@ public class FreeAgentClient {
             if (contactId != null && !contactId.isEmpty()) {
                 Response response = freeAgentServiceInstance.updateContact(new FreeAgentContactWrapper(contact), contactId);
                 if (response.getStatus() == 200) {
+                    contact.setUpdatedAt(dateFormat.format(new Date()));
                     return true;
                 } else {
                     return false;
@@ -445,6 +448,7 @@ public class FreeAgentClient {
             if (projectId != null && !projectId.isEmpty()) {
                 Response response = freeAgentServiceInstance.updateProject(new FreeAgentProjectWrapper(project), projectId);
                 if (response.getStatus() == 200) {
+                    project.setUpdatedAt(dateFormat.format(new Date()));
                     return true;
                 } else {
                     return false;
@@ -466,6 +470,159 @@ public class FreeAgentClient {
 
             if (projectId != null && !projectId.isEmpty()) {
                 Response response = freeAgentServiceInstance.deleteProject(projectId);
+
+                if (response.getStatus() == 200) {
+                    return true;
+                } else {
+                    return false;
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Returns a list of the invoices contained within FreeAgent
+     * for the authorised account.
+     *
+     * @return A list of FreeAgentInvoice instances.
+     */
+    public List<FreeAgentInvoice> getInvoices() {
+        return getInvoices(false);
+    }
+
+    /**
+     * Returns a list of the invoices contained within FreeAgent
+     * for the authorised account.
+     *
+     * @param nestInvoiceItems Should the invoice items also be included with the invoice
+     * @return A list of FreeAgentInvoice instances.
+     */
+    public List<FreeAgentInvoice> getInvoices(boolean nestInvoiceItems) {
+        FreeAgentInvoiceWrapper invoicesWrapper = freeAgentServiceInstance.getInvoices(nestInvoiceItems);
+
+        if (invoicesWrapper != null && invoicesWrapper.hasInvoices()) {
+            return invoicesWrapper.getInvoices();
+        } else {
+            return null;
+        }
+    }
+
+    /**
+     * Retrieves the invoice that matches the specified id.
+     *
+     * @param invoiceId The id to match.
+     * @return An Invoice instance or null if the id supplied was invalid or could not be matched.
+     */
+    public FreeAgentInvoice getInvoice(String invoiceId) {
+        if (invoiceId != null && !invoiceId.isEmpty()) {
+            FreeAgentInvoiceWrapper invoiceWrapper = freeAgentServiceInstance.getInvoice(invoiceId);
+            if (invoiceWrapper != null) {
+                return invoiceWrapper.getInvoice();
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Attempts to create a new invoice entry in the associated FreeAgent account.
+     *
+     * Will return null if the invoice instance provided is null or cannot be saved into the account.
+     *
+     * @param invoice The populated invoice instance.
+     * @return The updated invoice instance or null.
+     */
+    public FreeAgentInvoice createInvoice(FreeAgentInvoice invoice) {
+        if (invoice != null) {
+            FreeAgentInvoiceWrapper invoiceWrapper = freeAgentServiceInstance.createInvoice(new FreeAgentInvoiceWrapper(invoice));
+            if (invoiceWrapper != null) {
+                return invoiceWrapper.getInvoice();
+            }
+        }
+        return null;
+    }
+
+
+
+    /**
+     * Builds a new project instance from the specified JSON string. The instance has not been
+     * sent to FreeAgent.
+     *
+     * @param invoiceJSON A string containing invoice information in FreeAgent friendly format.
+     * @return A populated invoice instance or null if the invoiceJSON is empty.
+     * @throws JsonSyntaxException If the format does not match the FreeAgent V2 Invoice format.
+     */
+    public FreeAgentInvoice buildInvoice(String invoiceJSON) throws JsonSyntaxException {
+        if (invoiceJSON == null || invoiceJSON.isEmpty()) {
+            return null;
+        }
+        return new GsonBuilder().create().fromJson(invoiceJSON, FreeAgentInvoice.class);
+    }
+
+    /**
+     * Attempts to import a new invoice into the associated FreeAgent account by deserialising the specified
+     * JSON invoice information and requesting a new invoice be created.
+     *
+     * NOTE: The import (creation within FreeAgent) will only be actioned if no URL property is present or if the
+     *       URL property is not populated. Otherwise null will be returned.
+     *
+     * @param invoiceJSON A string containing invoice information in FreeAgent friendly format.
+     * @return The newly populated invoice instance that has been imported into FreeAgent or null.
+     * @throws JsonSyntaxException If the format does not match the FreeAgent V2 Invoice format.
+     */
+    public FreeAgentInvoice importInvoice(String invoiceJSON) throws JsonSyntaxException {
+        if (invoiceJSON == null || invoiceJSON.isEmpty()) {
+            return null;
+        }
+
+        FreeAgentInvoice invoice = buildInvoice(invoiceJSON);
+
+        if (invoice != null && (invoice.getUrl() == null || invoice.getUrl().isEmpty())) {
+            FreeAgentInvoiceWrapper invoiceWrapper = freeAgentServiceInstance.createInvoice(new FreeAgentInvoiceWrapper(invoice));
+
+            if (invoiceWrapper != null) {
+                return invoiceWrapper.getInvoice();
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Attempts to update the specified invoice entry in the associated FreeAgent account.
+     *
+     * @param invoice The populated Invoice instance.
+     * @return True if the invoice has been updated successfully, otherwise false.
+     */
+    public boolean updateInvoice(FreeAgentInvoice invoice) {
+        if (invoice != null) {
+            String invoiceId = extractIdentifier(invoice.getUrl());
+
+            if (invoiceId != null && !invoiceId.isEmpty()) {
+                Response response = freeAgentServiceInstance.updateInvoice(new FreeAgentInvoiceWrapper(invoice), invoiceId);
+                if (response.getStatus() == 200) {
+                    invoice.setUpdatedAt(dateFormat.format(new Date()));
+                    return true;
+                } else {
+                    return false;
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Attempts to delete the specified invoice entry in the associated FreeAgent account.
+     *
+     * @param invoice The populated invoice instance.
+     * @return True if the invoice has been deleted successfully, otherwise false.
+     */
+    public boolean deleteInvoice(FreeAgentInvoice invoice) {
+        if (invoice != null) {
+            String invoiceId = extractIdentifier(invoice.getUrl());
+
+            if (invoiceId != null && !invoiceId.isEmpty()) {
+                Response response = freeAgentServiceInstance.deleteInvoice(invoiceId);
 
                 if (response.getStatus() == 200) {
                     return true;
@@ -630,14 +787,19 @@ public class FreeAgentClient {
         return null;
     }
 
-    private FreeAgentClient(Credential oauthCredential, String apiURL) {
+    private FreeAgentClient(Credential oauthCredential, String apiURL, boolean loggingEnabled) {
         super();
         this.credential = oauthCredential;
+        this.dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+        this.dateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
 
         RestAdapter.Builder builder = new RestAdapter.Builder()
                 .setEndpoint(apiURL);
 
-        builder.setLogLevel(RestAdapter.LogLevel.FULL);
+        if (loggingEnabled) {
+            builder.setLogLevel(RestAdapter.LogLevel.FULL);
+        }
+
         builder.setRequestInterceptor(new RequestInterceptor() {
 
             @Override
@@ -649,6 +811,10 @@ public class FreeAgentClient {
         RestAdapter restAdapter = builder.build();
 
         freeAgentServiceInstance = restAdapter.create(FreeAgentService.class);
+    }
+
+    public String formatDate(Date date) {
+        return dateFormat.format(date);
     }
 
     public String extractIdentifier(String url) {
@@ -703,7 +869,6 @@ public class FreeAgentClient {
         ProjectStatusType(String identifier) {
             this.identifier = identifier;
         }
-
     }
 
     public enum UserPermissionType {

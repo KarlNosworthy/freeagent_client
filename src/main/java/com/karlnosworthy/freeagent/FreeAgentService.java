@@ -39,6 +39,24 @@ public interface FreeAgentService {
     Response deleteContact(@Path("id") String contactId);
 
     //
+    // ==== Invoices ====
+    //
+    @GET("/invoices")
+    FreeAgentInvoiceWrapper getInvoices(@Query("nested_invoice_items") boolean nestInvoiceItems);
+
+    @GET("/invoices/{id}")
+    FreeAgentInvoiceWrapper getInvoice(@Path("id") String invoiceId);
+
+    @POST("/invoices")
+    FreeAgentInvoiceWrapper createInvoice(@Body FreeAgentInvoiceWrapper invoice);
+
+    @PUT("/invoices/{id}")
+    Response updateInvoice(@Body FreeAgentInvoiceWrapper invoice, @Path("id") String invoiceId);
+
+    @DELETE("/invoices/{id}")
+    Response deleteInvoice(@Path("id") String invoiceId);
+
+    //
     // ==== Projects ====
     //
     @GET("/projects/")
