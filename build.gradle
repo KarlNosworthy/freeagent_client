@@ -16,7 +16,9 @@ repositories {
 }
 
 dependencies {
-    compile 'com.squareup.retrofit:retrofit:1.9.0'
+    compile 'com.squareup.retrofit2:retrofit:2.0.2'
+    compile 'com.squareup.retrofit2:converter-gson:2.0.2'
+    compile 'com.squareup.okhttp3:logging-interceptor:3.2.0'
     compile 'com.google.apis:google-api-services-oauth2:v1-rev95-1.20.0'
     compile 'com.google.oauth-client:google-oauth-client-jetty:1.20.0'
 }

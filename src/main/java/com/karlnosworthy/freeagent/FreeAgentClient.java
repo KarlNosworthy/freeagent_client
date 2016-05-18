@@ -16,9 +16,14 @@ import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
 import com.karlnosworthy.freeagent.model.*;
 import com.karlnosworthy.freeagent.model.wrapper.*;
-import retrofit.RequestInterceptor;
-import retrofit.RestAdapter;
-import retrofit.client.Response;
+import okhttp3.Interceptor;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.logging.HttpLoggingInterceptor;
+import retrofit2.Response;
+import retrofit2.Retrofit;
+import retrofit2.Call;
+import retrofit2.converter.gson.GsonConverterFactory;
 
 import java.io.File;
 import java.io.IOException;
@@ -37,8 +42,8 @@ import java.util.TimeZone;
  */
 public class FreeAgentClient {
 
-    public static final String SANDBOX_URL = "https://api.sandbox.freeagent.com";
-    public static final String LIVE_URL = "https://api.freeagent.com/v2";
+    public static final String SANDBOX_URL = "https://api.sandbox.freeagent.com/";
+    public static final String LIVE_URL = "https://api.freeagent.com/v2/";
 
     private static final String LOCALHOST = "127.0.0.1"; // NOPMD
 
@@ -111,9 +116,10 @@ public class FreeAgentClient {
      *
      * @return A populated FreeAgentCompany instance or null.
      */
-    public FreeAgentCompany getCompany() {
-        FreeAgentCompanyWrapper companyWrapper = freeAgentServiceInstance.getCompany();
+    public FreeAgentCompany getCompany() throws IOException {
+        Call<FreeAgentCompanyWrapper> companyCall = freeAgentServiceInstance.getCompany();
 
+        FreeAgentCompanyWrapper companyWrapper = companyCall.execute().body();
         if (companyWrapper != null) {
             return companyWrapper.getCompany();
         }
@@ -126,8 +132,10 @@ public class FreeAgentClient {
      *
      * @return A list of Contact instances.
      */
-    public List<FreeAgentContact> getContacts() {
-        FreeAgentContactWrapper contactsWrapper = freeAgentServiceInstance.getContacts();
+    public List<FreeAgentContact> getContacts() throws IOException {
+        Call<FreeAgentContactWrapper> contactsCall = freeAgentServiceInstance.getContacts();
+
+        FreeAgentContactWrapper contactsWrapper = contactsCall.execute().body();
         if (contactsWrapper != null) {
             return contactsWrapper.getContacts();
         }
@@ -141,8 +149,10 @@ public class FreeAgentClient {
      * @param viewType The view type {@link com.karlnosworthy.freeagent.FreeAgentClient.ContactViewType} filter to apply to the contacts
      * @return A list of Contact instances.
      */
-    public List<FreeAgentContact> getContacts(ContactViewType viewType) {
-        FreeAgentContactWrapper contactsWrapper = freeAgentServiceInstance.getContacts(viewType.identifier);
+    public List<FreeAgentContact> getContacts(ContactViewType viewType) throws IOException {
+        Call<FreeAgentContactWrapper> contactsForTypeCall = freeAgentServiceInstance.getContacts(viewType.identifier);
+
+        FreeAgentContactWrapper contactsWrapper = contactsForTypeCall.execute().body();
         if (contactsWrapper != null) {
             return contactsWrapper.getContacts();
         }
@@ -157,8 +167,10 @@ public class FreeAgentClient {
      * @param sortOrderType The sort order {@link com.karlnosworthy.freeagent.FreeAgentClient.ContactSortOrderType} to apply to the contacts.
      * @return A list of Contact instances.
      */
-    public List<FreeAgentContact> getContacts(ContactViewType viewType, ContactSortOrderType sortOrderType) {
-        FreeAgentContactWrapper contactsWrapper = freeAgentServiceInstance.getContacts(viewType.identifier, sortOrderType.identifier);
+    public List<FreeAgentContact> getContacts(ContactViewType viewType, ContactSortOrderType sortOrderType) throws IOException {
+        Call<FreeAgentContactWrapper> contactByTypeWithSortOrderCall = freeAgentServiceInstance.getContacts(viewType.identifier, sortOrderType.identifier);
+
+        FreeAgentContactWrapper contactsWrapper = contactByTypeWithSortOrderCall.execute().body();
         if (contactsWrapper != null) {
             return contactsWrapper.getContacts();
         }
@@ -171,9 +183,11 @@ public class FreeAgentClient {
      * @param contactId The id to match.
      * @return A Contact instance or null if the id supplied was invalid or could not be matched.
      */
-    public FreeAgentContact getContact(String contactId) {
+    public FreeAgentContact getContact(String contactId) throws IOException {
         if (contactId != null && !contactId.isEmpty()) {
-            FreeAgentContactWrapper contactWrapper = freeAgentServiceInstance.getContact(contactId);
+            Call<FreeAgentContactWrapper> contactByIdCall = freeAgentServiceInstance.getContact(contactId);
+
+            FreeAgentContactWrapper contactWrapper = contactByIdCall.execute().body();
             if (contactWrapper != null) {
                 return contactWrapper.getContact();
             }
@@ -189,9 +203,11 @@ public class FreeAgentClient {
      * @param contact The populated contact instance.
      * @return The updated contact instance or null.
      */
-    public FreeAgentContact createContact(FreeAgentContact contact) {
+    public FreeAgentContact createContact(FreeAgentContact contact) throws IOException {
         if (contact != null) {
-            FreeAgentContactWrapper contactWrapper = freeAgentServiceInstance.createContact(new FreeAgentContactWrapper(contact));
+            Call<FreeAgentContactWrapper> createContactCall = freeAgentServiceInstance.createContact(new FreeAgentContactWrapper(contact));
+
+            FreeAgentContactWrapper contactWrapper = createContactCall.execute().body();
             if (contactWrapper != null) {
                 return contactWrapper.getContact();
             }
@@ -225,7 +241,7 @@ public class FreeAgentClient {
      * @return The newly populated contact instance that has been imported into FreeAgent or null.
      * @throws JsonSyntaxException If the format does not match the FreeAgent V2 Contact format.
      */
-    public FreeAgentContact importContact(String contactJSON) throws JsonSyntaxException {
+    public FreeAgentContact importContact(String contactJSON) throws JsonSyntaxException, IOException {
         if (contactJSON == null || contactJSON.isEmpty()) {
             return null;
         }
@@ -233,8 +249,9 @@ public class FreeAgentClient {
         FreeAgentContact contact = buildContact(contactJSON);
 
         if (contact != null && (contact.getUrl() == null || contact.getUrl().isEmpty())) {
-            FreeAgentContactWrapper contactWrapper = freeAgentServiceInstance.createContact(new FreeAgentContactWrapper(contact));
+            Call<FreeAgentContactWrapper> createContactCall = freeAgentServiceInstance.createContact(new FreeAgentContactWrapper(contact));
 
+            FreeAgentContactWrapper contactWrapper = createContactCall.execute().body();
             if (contactWrapper != null) {
                 return contactWrapper.getContact();
             }
@@ -255,7 +272,7 @@ public class FreeAgentClient {
 
             if (contactId != null && !contactId.isEmpty()) {
                 Response response = freeAgentServiceInstance.updateContact(new FreeAgentContactWrapper(contact), contactId);
-                if (response.getStatus() == 200) {
+                if (response.code() == 200) {
                     contact.setUpdatedAt(dateFormat.format(new Date()));
                     return true;
                 } else {
@@ -278,8 +295,7 @@ public class FreeAgentClient {
 
             if (contactId != null && !contactId.isEmpty()) {
                 Response response = freeAgentServiceInstance.deleteContact(contactId);
-
-                if (response.getStatus() == 200) {
+                if (response.code() == 200) {
                     return true;
                 } else {
                     return false;
@@ -295,13 +311,14 @@ public class FreeAgentClient {
      * @param project The populated project instance to retrieve the contact for.
      * @return A populated FreeAgentContact instance or null if the contact could not be found.
      */
-    public FreeAgentContact getContactForProject(FreeAgentProject project) {
+    public FreeAgentContact getContactForProject(FreeAgentProject project) throws IOException {
         if (project != null) {
             String contactId = extractIdentifier(project.getContact());
 
             if (contactId != null && !contactId.isEmpty()) {
-                FreeAgentContactWrapper contactWrapper = freeAgentServiceInstance.getContact(contactId);
+                Call<FreeAgentContactWrapper> contactByIdCall = freeAgentServiceInstance.getContact(contactId);
 
+                FreeAgentContactWrapper contactWrapper = contactByIdCall.execute().body();
                 if (contactWrapper != null) {
                     return contactWrapper.getContact();
                 }
@@ -316,9 +333,10 @@ public class FreeAgentClient {
      *
      * @return A list of Project instances.
      */
-    public List<FreeAgentProject> getProjects() {
-        FreeAgentProjectWrapper projectsWrapper = freeAgentServiceInstance.getProjects();
+    public List<FreeAgentProject> getProjects() throws IOException {
+        Call<FreeAgentProjectWrapper> projectsCall = freeAgentServiceInstance.getProjects();
 
+        FreeAgentProjectWrapper projectsWrapper = projectsCall.execute().body();
         if (projectsWrapper != null) {
             return projectsWrapper.getProjects();
         }
@@ -332,9 +350,10 @@ public class FreeAgentClient {
      * @param statusType The view type {@link com.karlnosworthy.freeagent.FreeAgentClient.ProjectStatusType} filter to apply to the projects.
      * @return A list of Project instances.
      */
-    public List<FreeAgentProject> getProjects(ProjectStatusType statusType) {
-        FreeAgentProjectWrapper projectsWrapper = freeAgentServiceInstance.getProjects(statusType.identifier);
+    public List<FreeAgentProject> getProjects(ProjectStatusType statusType) throws IOException {
+        Call<FreeAgentProjectWrapper> projectsByTypeCall = freeAgentServiceInstance.getProjects(statusType.identifier);
 
+        FreeAgentProjectWrapper projectsWrapper = projectsByTypeCall.execute().body();
         if (projectsWrapper != null) {
             return projectsWrapper.getProjects();
         }
@@ -347,10 +366,11 @@ public class FreeAgentClient {
      * @param contact The contact instance to look up projects for.
      * @return A list of the appropriate projects or null.
      */
-    public List<FreeAgentProject> getProjects(FreeAgentContact contact) {
+    public List<FreeAgentProject> getProjects(FreeAgentContact contact) throws IOException {
         if (contact != null && contact.getUrl() != null && !contact.getUrl().isEmpty()) {
+            Call<FreeAgentProjectWrapper> projectsForContactCall = freeAgentServiceInstance.getProjectsForContact(contact.getUrl());
 
-            FreeAgentProjectWrapper projectsWrapper = freeAgentServiceInstance.getProjectsForContact(contact.getUrl());
+            FreeAgentProjectWrapper projectsWrapper = projectsForContactCall.execute().body();
             if (projectsWrapper != null) {
                 return projectsWrapper.getProjects();
             }
@@ -364,10 +384,11 @@ public class FreeAgentClient {
      * @param projectId The id to match.
      * @return A Project instance or null if the id supplied was invalid or could not be matched.
      */
-    public FreeAgentProject getProject(String projectId) {
+    public FreeAgentProject getProject(String projectId) throws IOException {
         if (projectId != null && !projectId.isEmpty()) {
-            FreeAgentProjectWrapper projectWrapper = freeAgentServiceInstance.getProject(projectId);
+            Call<FreeAgentProjectWrapper> projectCall = freeAgentServiceInstance.getProject(projectId);
 
+            FreeAgentProjectWrapper projectWrapper = projectCall.execute().body();
             if (projectWrapper != null) {
                 return projectWrapper.getProject();
             }
@@ -383,9 +404,11 @@ public class FreeAgentClient {
      * @param project The populated project instance.
      * @return The updated project instance or null.
      */
-    public FreeAgentProject createProject(FreeAgentProject project) {
+    public FreeAgentProject createProject(FreeAgentProject project) throws IOException {
         if (project != null) {
-            FreeAgentProjectWrapper projectWrapper = freeAgentServiceInstance.createProject(new FreeAgentProjectWrapper(project));
+            Call<FreeAgentProjectWrapper> createProjectCall = freeAgentServiceInstance.createProject(new FreeAgentProjectWrapper(project));
+
+            FreeAgentProjectWrapper projectWrapper = createProjectCall.execute().body();
             if (projectWrapper != null) {
                 return projectWrapper.getProject();
             }
@@ -419,7 +442,7 @@ public class FreeAgentClient {
      * @return The newly populated project instance that has been imported into FreeAgent or null.
      * @throws JsonSyntaxException If the format does not match the FreeAgent V2 Project format.
      */
-    public FreeAgentProject importProject(String projectJSON) throws JsonSyntaxException {
+    public FreeAgentProject importProject(String projectJSON) throws JsonSyntaxException, IOException {
         if (projectJSON == null || projectJSON.isEmpty()) {
             return null;
         }
@@ -427,8 +450,9 @@ public class FreeAgentClient {
         FreeAgentProject project = buildProject(projectJSON);
 
         if (project != null && (project.getUrl() == null || project.getUrl().isEmpty())) {
-            FreeAgentProjectWrapper projectWrapper = freeAgentServiceInstance.createProject(new FreeAgentProjectWrapper(project));
+            Call<FreeAgentProjectWrapper> createProjectCall = freeAgentServiceInstance.createProject(new FreeAgentProjectWrapper(project));
 
+            FreeAgentProjectWrapper projectWrapper = createProjectCall.execute().body();
             if (projectWrapper != null) {
                 return projectWrapper.getProject();
             }
@@ -449,7 +473,7 @@ public class FreeAgentClient {
 
             if (projectId != null && !projectId.isEmpty()) {
                 Response response = freeAgentServiceInstance.updateProject(new FreeAgentProjectWrapper(project), projectId);
-                if (response.getStatus() == 200) {
+                if (response.code() == 200) {
                     project.setUpdatedAt(dateFormat.format(new Date()));
                     return true;
                 } else {
@@ -473,7 +497,7 @@ public class FreeAgentClient {
             if (projectId != null && !projectId.isEmpty()) {
                 Response response = freeAgentServiceInstance.deleteProject(projectId);
 
-                if (response.getStatus() == 200) {
+                if (response.code() == 200) {
                     return true;
                 } else {
                     return false;
@@ -489,7 +513,7 @@ public class FreeAgentClient {
      *
      * @return A list of FreeAgentInvoice instances.
      */
-    public List<FreeAgentInvoice> getInvoices() {
+    public List<FreeAgentInvoice> getInvoices() throws IOException {
         return getInvoices(false);
     }
 
@@ -500,9 +524,10 @@ public class FreeAgentClient {
      * @param nestInvoiceItems Should the invoice items also be included with the invoice
      * @return A list of FreeAgentInvoice instances.
      */
-    public List<FreeAgentInvoice> getInvoices(boolean nestInvoiceItems) {
-        FreeAgentInvoiceWrapper invoicesWrapper = freeAgentServiceInstance.getInvoices(nestInvoiceItems);
+    public List<FreeAgentInvoice> getInvoices(boolean nestInvoiceItems) throws IOException {
+        Call<FreeAgentInvoiceWrapper> invoicesCall = freeAgentServiceInstance.getInvoices(nestInvoiceItems);
 
+        FreeAgentInvoiceWrapper invoicesWrapper = invoicesCall.execute().body();
         if (invoicesWrapper != null && invoicesWrapper.hasInvoices()) {
             return invoicesWrapper.getInvoices();
         } else {
@@ -516,9 +541,11 @@ public class FreeAgentClient {
      * @param invoiceId The id to match.
      * @return An Invoice instance or null if the id supplied was invalid or could not be matched.
      */
-    public FreeAgentInvoice getInvoice(String invoiceId) {
+    public FreeAgentInvoice getInvoice(String invoiceId) throws IOException {
         if (invoiceId != null && !invoiceId.isEmpty()) {
-            FreeAgentInvoiceWrapper invoiceWrapper = freeAgentServiceInstance.getInvoice(invoiceId);
+            Call<FreeAgentInvoiceWrapper> invoiceCall = freeAgentServiceInstance.getInvoice(invoiceId);
+
+            FreeAgentInvoiceWrapper invoiceWrapper = invoiceCall.execute().body();
             if (invoiceWrapper != null) {
                 return invoiceWrapper.getInvoice();
             }
@@ -534,9 +561,11 @@ public class FreeAgentClient {
      * @param invoice The populated invoice instance.
      * @return The updated invoice instance or null.
      */
-    public FreeAgentInvoice createInvoice(FreeAgentInvoice invoice) {
+    public FreeAgentInvoice createInvoice(FreeAgentInvoice invoice) throws IOException {
         if (invoice != null) {
-            FreeAgentInvoiceWrapper invoiceWrapper = freeAgentServiceInstance.createInvoice(new FreeAgentInvoiceWrapper(invoice));
+            Call<FreeAgentInvoiceWrapper> createInvoiceCall = freeAgentServiceInstance.createInvoice(new FreeAgentInvoiceWrapper(invoice));
+
+            FreeAgentInvoiceWrapper invoiceWrapper = createInvoiceCall.execute().body();
             if (invoiceWrapper != null) {
                 return invoiceWrapper.getInvoice();
             }
@@ -587,7 +616,7 @@ public class FreeAgentClient {
      * @return The newly populated invoice instance that has been imported into FreeAgent or null.
      * @throws JsonSyntaxException If the format does not match the FreeAgent V2 Invoice format.
      */
-    public FreeAgentInvoice importInvoice(String invoiceJSON) throws JsonSyntaxException {
+    public FreeAgentInvoice importInvoice(String invoiceJSON) throws JsonSyntaxException, IOException {
         if (invoiceJSON == null || invoiceJSON.isEmpty()) {
             return null;
         }
@@ -595,8 +624,9 @@ public class FreeAgentClient {
         FreeAgentInvoice invoice = buildInvoice(invoiceJSON);
 
         if (invoice != null && (invoice.getUrl() == null || invoice.getUrl().isEmpty())) {
-            FreeAgentInvoiceWrapper invoiceWrapper = freeAgentServiceInstance.createInvoice(new FreeAgentInvoiceWrapper(invoice));
+            Call<FreeAgentInvoiceWrapper> createInvoiceCall = freeAgentServiceInstance.createInvoice(new FreeAgentInvoiceWrapper(invoice));
 
+            FreeAgentInvoiceWrapper invoiceWrapper = createInvoiceCall.execute().body();
             if (invoiceWrapper != null) {
                 return invoiceWrapper.getInvoice();
             }
@@ -617,7 +647,7 @@ public class FreeAgentClient {
 
             if (invoiceId != null && !invoiceId.isEmpty()) {
                 Response response = freeAgentServiceInstance.updateInvoice(new FreeAgentInvoiceWrapper(invoice), invoiceId);
-                if (response.getStatus() == 200) {
+                if (response.code() == 200) {
                     invoice.setUpdatedAt(dateFormat.format(new Date()));
                     return true;
                 } else {
@@ -641,7 +671,7 @@ public class FreeAgentClient {
             if (invoiceId != null && !invoiceId.isEmpty()) {
                 Response response = freeAgentServiceInstance.deleteInvoice(invoiceId);
 
-                if (response.getStatus() == 200) {
+                if (response.code() == 200) {
                     return true;
                 } else {
                     return false;
@@ -657,9 +687,10 @@ public class FreeAgentClient {
      *
      * @return A list of User instances.
      */
-    public List<FreeAgentUser> getUsers() {
-        FreeAgentUserWrapper usersWrapper = freeAgentServiceInstance.getUsers();
+    public List<FreeAgentUser> getUsers() throws IOException {
+        Call<FreeAgentUserWrapper> usersCall = freeAgentServiceInstance.getUsers();
 
+        FreeAgentUserWrapper usersWrapper = usersCall.execute().body();
         if (usersWrapper != null) {
             return usersWrapper.getUsers();
         }
@@ -672,9 +703,11 @@ public class FreeAgentClient {
      * @param userId The id to match.
      * @return A User instance or null if the id supplied was invalid or could not be matched.
      */
-    public FreeAgentUser getUser(String userId) {
+    public FreeAgentUser getUser(String userId) throws IOException {
         if (userId != null && !userId.isEmpty()) {
-            FreeAgentUserWrapper userWrapper = freeAgentServiceInstance.getUser(userId);
+            Call<FreeAgentUserWrapper> userCall = freeAgentServiceInstance.getUser(userId);
+
+            FreeAgentUserWrapper userWrapper = userCall.execute().body();
             if (userWrapper != null) {
                 return userWrapper.getUser();
             }
@@ -688,9 +721,10 @@ public class FreeAgentClient {
      *
      * @return The current user/personal profile or null if the profile could not be obtained.
      */
-    public FreeAgentUser getPersonalProfile() {
-        FreeAgentUserWrapper userWrapper = freeAgentServiceInstance.getCurrentUser();
+    public FreeAgentUser getPersonalProfile() throws IOException {
+        Call<FreeAgentUserWrapper> currentUserCall = freeAgentServiceInstance.getCurrentUser();
 
+        FreeAgentUserWrapper userWrapper = currentUserCall.execute().body();
         if (userWrapper != null) {
             return userWrapper.getUser();
         }
@@ -705,9 +739,11 @@ public class FreeAgentClient {
      * @param user The populated user instance.
      * @return The updated user instance or null.
      */
-    public FreeAgentUser createUser(FreeAgentUser user) {
+    public FreeAgentUser createUser(FreeAgentUser user) throws IOException {
         if (user != null) {
-            FreeAgentUserWrapper userWrapper = freeAgentServiceInstance.createUser(new FreeAgentUserWrapper(user));
+            Call<FreeAgentUserWrapper> createUserCall = freeAgentServiceInstance.createUser(new FreeAgentUserWrapper(user));
+
+            FreeAgentUserWrapper userWrapper = createUserCall.execute().body();
             if (userWrapper != null) {
                 return userWrapper.getUser();
             }
@@ -727,7 +763,7 @@ public class FreeAgentClient {
 
             if (userId != null && !userId.isEmpty()) {
                 Response response = freeAgentServiceInstance.updateUser(new FreeAgentUserWrapper(user), userId);
-                if (response.getStatus() == 200) {
+                if (response.code() == 200) {
                     return true;
                 } else {
                     return false;
@@ -750,7 +786,7 @@ public class FreeAgentClient {
             if (userId != null && !userId.isEmpty()) {
                 Response response = freeAgentServiceInstance.deleteUser(userId);
 
-                if (response.getStatus() == 200) {
+                if (response.code() == 200) {
                     return true;
                 } else {
                     return false;
@@ -786,7 +822,7 @@ public class FreeAgentClient {
      * @return The newly populated user instance that has been imported into FreeAgent or null.
      * @throws JsonSyntaxException If the format does not match the FreeAgent V2 User format.
      */
-    public FreeAgentUser importUser(String userJSON) throws JsonSyntaxException {
+    public FreeAgentUser importUser(String userJSON) throws JsonSyntaxException, IOException {
         if (userJSON == null || userJSON.isEmpty()) {
             return null;
         }
@@ -794,8 +830,9 @@ public class FreeAgentClient {
         FreeAgentUser user = buildUser(userJSON);
 
         if (user != null && (user.getUrl() == null || user.getUrl().isEmpty())) {
-            FreeAgentUserWrapper userWrapper = freeAgentServiceInstance.createUser(new FreeAgentUserWrapper(user));
+            Call<FreeAgentUserWrapper> createUserCall = freeAgentServiceInstance.createUser(new FreeAgentUserWrapper(user));
 
+            FreeAgentUserWrapper userWrapper = createUserCall.execute().body();
             if (userWrapper != null) {
                 return userWrapper.getUser();
             }
@@ -804,19 +841,42 @@ public class FreeAgentClient {
         return null;
     }
 
-    private FreeAgentClient(Credential oauthCredential, String apiURL, boolean loggingEnabled) {
+    private FreeAgentClient(final Credential oauthCredential, String apiURL, boolean loggingEnabled) {
         super();
         this.credential = oauthCredential;
         this.dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
         this.dateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
 
-        RestAdapter.Builder builder = new RestAdapter.Builder()
-                .setEndpoint(apiURL);
+
+        OkHttpClient.Builder httpClient = new OkHttpClient.Builder();
 
         if (loggingEnabled) {
-            builder.setLogLevel(RestAdapter.LogLevel.FULL);
+            HttpLoggingInterceptor logging = new HttpLoggingInterceptor();
+            logging.setLevel(HttpLoggingInterceptor.Level.BODY);
+            httpClient.addInterceptor(logging);
         }
 
+        httpClient.addInterceptor(new Interceptor() {
+            @Override
+            public okhttp3.Response intercept(Chain chain) throws IOException {
+                Request original = chain.request();
+
+                // Request customization: add request headers
+                Request.Builder requestBuilder = original.newBuilder()
+                        .header("Authorization", "Bearer " + oauthCredential.getAccessToken())
+                        .header("Accept", "application/json")
+                        .method(original.method(), original.body());
+
+                Request request = requestBuilder.build();
+                return chain.proceed(request);
+            }
+        });
+
+        Retrofit retrofit = new Retrofit.Builder().baseUrl(apiURL)
+                                                  .addConverterFactory(GsonConverterFactory.create())
+                                                  .client(httpClient.build())
+                                                  .build();
+/*
         builder.setRequestInterceptor(new RequestInterceptor() {
 
             @Override
@@ -824,10 +884,8 @@ public class FreeAgentClient {
                 request.addHeader("Authorization", "Bearer " + credential.getAccessToken());
             }
         });
-
-        RestAdapter restAdapter = builder.build();
-
-        freeAgentServiceInstance = restAdapter.create(FreeAgentService.class);
+*/
+        freeAgentServiceInstance = retrofit.create(FreeAgentService.class);
     }
 
     public String formatDate(Date date) {
