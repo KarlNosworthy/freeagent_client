@@ -933,7 +933,6 @@ public class FreeAgentClient {
     }
 
     public enum ProjectStatusType {
-
         Active("active"),
         Completed("completed"),
         Cancelled("cancelled"),
@@ -944,6 +943,24 @@ public class FreeAgentClient {
         ProjectStatusType(String identifier) {
             this.identifier = identifier;
         }
+    }
+
+    public enum TaskStatusType {
+        Active("active"),
+        Completed("completed"),
+        Hidden("hidden");
+
+        private String identifier;
+
+        TaskStatusType(String identifier) {
+            this.identifier = identifier;
+        }
+
+/*
+        Active
+Completed
+Hidden
+         */
     }
 
     public enum UserPermissionType {

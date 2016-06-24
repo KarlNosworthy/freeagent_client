@@ -101,6 +101,13 @@ public interface FreeAgentService {
 
     @DELETE("users/{id}")
     Response deleteUser(@Path("id") String userId);
+
+    //
+    // ==== Tasks ====
+    //
+    @GET("tasks/")
+    Call<FreeAgentTaskWrapper> getTask();
+
 }
 
 
