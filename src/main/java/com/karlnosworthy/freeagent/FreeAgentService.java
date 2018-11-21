@@ -45,6 +45,12 @@ public interface FreeAgentService {
     @GET("invoices")
     Call<FreeAgentInvoiceWrapper> getInvoices(@Query("nested_invoice_items") boolean nestInvoiceItems);
 
+    // add call here to list for past n months
+
+    @GET("invoices")
+    Call<FreeAgentInvoiceWrapper> getInvoices(@Query("view") String viewType, @Query("per_page") int itemsPerPage);
+
+
     @GET("invoices/{id}")
     Call<FreeAgentInvoiceWrapper> getInvoice(@Path("id") String invoiceId);
 
@@ -101,6 +107,16 @@ public interface FreeAgentService {
 
     @DELETE("users/{id}")
     Response deleteUser(@Path("id") String userId);
+
+
+    //
+    // ==== Expenses ====
+    //
+    @GET("expenses")
+    Call<FreeAgentExpenseWrapper> getExpenses();
+
+    @GET("expenses")
+    Call<FreeAgentExpenseWrapper> getExpensesBetween(@Query("from_date") String fromDate, @Query("to_date") String toDate, @Query("per_page") int itemsPerPage);
 }
 
 

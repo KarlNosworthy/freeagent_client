@@ -28,10 +28,9 @@ import retrofit2.converter.gson.GsonConverterFactory;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Type;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.List;
-import java.util.TimeZone;
+import java.util.*;
 
 
 /**
@@ -55,6 +54,8 @@ public class FreeAgentClient {
     private static FileDataStoreFactory DATA_STORE_FACTORY;
     private static FreeAgentService freeAgentServiceInstance;
     private Credential credential;
+
+    private SimpleDateFormat queryDateFormatter = new SimpleDateFormat("yyyy-MM-dd");
 
 
 
@@ -535,6 +536,20 @@ public class FreeAgentClient {
         }
     }
 
+    public List<FreeAgentInvoice> getInvoicesForPreviousMonths(int numberOfMonths, boolean nestInvoiceItems) throws IOException {
+
+        String viewType = "last_" + numberOfMonths + "_months";
+
+        Call<FreeAgentInvoiceWrapper> invoicesCall = freeAgentServiceInstance.getInvoices(viewType, 100);
+
+        FreeAgentInvoiceWrapper invoicesWrapper = invoicesCall.execute().body();
+        if (invoicesWrapper != null && invoicesWrapper.hasInvoices()) {
+            return invoicesWrapper.getInvoices();
+        } else {
+            return null;
+        }
+    }
+
     /**
      * Retrieves the invoice that matches the specified id.
      *
@@ -841,6 +856,26 @@ public class FreeAgentClient {
         return null;
     }
 
+    public List<FreeAgentExpense> getExpensesBetween(Date startDate, Date endDate) throws IOException {
+
+        if (startDate != null && endDate != null) {
+            String startDateString = queryDateFormatter.format(startDate);
+            String endDateString = queryDateFormatter.format(endDate);
+            Call<FreeAgentExpenseWrapper> expensesBetweenCall = freeAgentServiceInstance.getExpensesBetween(startDateString, endDateString, 100);
+
+            FreeAgentExpenseWrapper expenseWrapper = expensesBetweenCall.execute().body();
+            if (expenseWrapper != null && expenseWrapper.hasExpenses()) {
+                return expenseWrapper.getExpenses();
+            } else {
+                return null;
+            }
+        }
+
+        return null;
+    }
+
+
+
     private FreeAgentClient(final Credential oauthCredential, String apiURL, boolean loggingEnabled) {
         super();
         this.credential = oauthCredential;
@@ -891,6 +926,7 @@ public class FreeAgentClient {
     public String formatDate(Date date) {
         return dateFormat.format(date);
     }
+
 
     public String extractIdentifier(String url) {
         if (url != null && !url.isEmpty()) {
